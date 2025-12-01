@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_vector_db
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./appqdrant_storage:/qdrant/storage
+    restart: always
+
+  app:
+    build: .
+    container_name: sleep_ai_app
+    ports:
+      - "8881:8881"
+    depends_on:
+      - qdrant
+    environment:
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+    restart: always
