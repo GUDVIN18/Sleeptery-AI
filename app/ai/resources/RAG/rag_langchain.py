@@ -1,3 +1,4 @@
+import os
 import asyncio
 from langchain_qdrant import QdrantVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -5,12 +6,15 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest_models
 import time
 
-GEMINI_API_KEY = "AIzaSyBTZrHzTujPbZnnOpMdQDUb9jP0IcyFtx0" 
+
+GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
+EMBEDDING_MODEL_ID = os.getenv("EMBEDDING_MODEL_ID")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 client = QdrantClient(host="qdrant", port=6333)
 
 embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-004",
+    model=f"models/{EMBEDDING_MODEL_ID}",
     google_api_key=GEMINI_API_KEY,
     task_type="retrieval_query"
 )
@@ -18,7 +22,7 @@ embeddings = GoogleGenerativeAIEmbeddings(
 def get_vector_store():
     return QdrantVectorStore(
         client=client,
-        collection_name="sleep_ai_knowledge_base",
+        collection_name=COLLECTION_NAME,
         embedding=embeddings,
         retrieval_mode="dense",
         content_payload_key="text"

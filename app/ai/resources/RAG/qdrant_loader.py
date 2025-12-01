@@ -4,7 +4,7 @@ from pathlib import Path
 import pdfplumber
 import os
 from dotenv import load_dotenv
-from loguru import logger as log
+from app.include.logging_config import logger as log
 from qdrant_client import QdrantClient, models
 from qdrant_client.models import Distance, VectorParams
 from tqdm import tqdm
@@ -13,15 +13,15 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 load_dotenv()
 
-EMBEDDING_MODEL_ID = "text-embedding-004"  # text-embedding-004 / gemini-embedding-001
+GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
+EMBEDDING_MODEL_ID = os.getenv("EMBEDDING_MODEL_ID")
+QDRANT_HOST = os.getenv("QDRANT_HOST")
+QDRANT_PORT = os.getenv("QDRANT_PORT")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+VECTOR_DIMENSION = int(os.getenv("VECTOR_DIMENSION"))
+BATCH_SIZE = int(os.getenv("BATCH_SIZE"))
 
-QDRANT_HOST = "qdrant"
-QDRANT_PORT = 6333
-COLLECTION_NAME = "sleep_ai_knowledge_base"
-VECTOR_DIMENSION = 768  # 768 для text-embedding-004, 3072 для gemini-embedding-001
-BATCH_SIZE = 150
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(api_key=GEMINI_API_KEY)
 qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 text_splitter = MarkdownHeaderTextSplitter(
     headers_to_split_on=[

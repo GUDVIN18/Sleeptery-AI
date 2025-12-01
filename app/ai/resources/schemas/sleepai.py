@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from dataclasses import dataclass
+from typing import Any, Dict
 
 
 @dataclass
@@ -30,4 +31,4 @@ class ResponseSleepAi(BaseModel):
     )
 
 class UploadSleepAi(BaseModel):
-    sleep_json: dict = Field(..., description="json сна")
+    sleep_json: Dict[str, Any]

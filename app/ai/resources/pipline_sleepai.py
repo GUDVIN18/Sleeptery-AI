@@ -4,26 +4,29 @@ import asyncio
 import json
 from dotenv import load_dotenv
 import os
-from loguru import logger as log
 import traceback
 from typing import List
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_deepseek import ChatDeepSeek
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.tools import tool, ToolRuntime
 from langgraph.checkpoint.memory import InMemorySaver
 
-from .schemas.sleepai import ResponseFormat, ResponseFormatAi
+from .schemas.sleepai import ResponseFormat, ResponseFormatAi, UploadSleepAi
 from .RAG.rag_langchain import retrieve_context
 from .exceptions import (
     SleepAiErrorGeneration,
     SleepAiErrorFormat, 
     SleepAiErrorConnect
 )
+from app.include.logging_config import logger as log
 
 
 load_dotenv()
+
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+MODEL = os.getenv("MODEL")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,9 +48,7 @@ def extract_full_block(block: dict) -> dict:
         }
     return result
 
-async def geration_pipe(sleep_data: dict) -> ResponseFormatAi:
-    sleep_data = json.loads(sleep_data)
-    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
     if not DEEPSEEK_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
     
@@ -66,7 +67,7 @@ async def geration_pipe(sleep_data: dict) -> ResponseFormatAi:
     agent_helper = create_agent(
         model=ChatDeepSeek(
             api_key=DEEPSEEK_API_KEY,
-            model="deepseek-chat",
+            model=MODEL,
             temperature=0.1,
         ),
         system_prompt=help_model_system_instruction,

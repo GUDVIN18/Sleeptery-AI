@@ -13,6 +13,8 @@ services:
   app:
     build: .
     container_name: sleep_ai_app
+    env_file:
+      - .env
     ports:
       - "8881:8881"
     depends_on:
@@ -20,4 +22,5 @@ services:
     environment:
       QDRANT_HOST: qdrant
       QDRANT_PORT: 6333
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     restart: always
