@@ -3,26 +3,16 @@ from google.genai import types
 from pathlib import Path
 import pdfplumber
 import os
-from dotenv import load_dotenv
 from app.include.logging_config import logger as log
 from qdrant_client import QdrantClient, models
 from qdrant_client.models import Distance, VectorParams
 from tqdm import tqdm
 from langchain_text_splitters import MarkdownHeaderTextSplitter
+from include.config import config
 
 
-load_dotenv()
-
-GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
-EMBEDDING_MODEL_ID = os.getenv("EMBEDDING_MODEL_ID")
-QDRANT_HOST = os.getenv("QDRANT_HOST")
-QDRANT_PORT = os.getenv("QDRANT_PORT")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
-VECTOR_DIMENSION = int(os.getenv("VECTOR_DIMENSION"))
-BATCH_SIZE = int(os.getenv("BATCH_SIZE"))
-
-client = genai.Client(api_key=GEMINI_API_KEY)
-qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+client = genai.Client(api_key=config.GEMINI_API_KEY)
+qdrant_client = QdrantClient(host=config.QDRANT_HOST, port=config.QDRANT_PORT)
 text_splitter = MarkdownHeaderTextSplitter(
     headers_to_split_on=[
         ('##', 'advice'), 
@@ -34,14 +24,14 @@ text_splitter = MarkdownHeaderTextSplitter(
 class SleepAiRagEmbeddingConfig:
     @staticmethod
     def run_pipeline(file_paths: list[Path]):
-        if not qdrant_client.collection_exists(collection_name=COLLECTION_NAME):
-            log.info(f"Создание коллекции: {COLLECTION_NAME}")
+        if not qdrant_client.collection_exists(collection_name=config.COLLECTION_NAME):
+            log.info(f"Создание коллекции: {config.COLLECTION_NAME}")
             qdrant_client.recreate_collection(
-                collection_name=COLLECTION_NAME,
-                vectors_config=VectorParams(size=VECTOR_DIMENSION, distance=Distance.COSINE)
+                collection_name=config.COLLECTION_NAME,
+                vectors_config=VectorParams(size=config.VECTOR_DIMENSION, distance=Distance.COSINE)
             )
         else:
-            log.info(f"Коллекция {COLLECTION_NAME} уже существует.")
+            log.info(f"Коллекция {config.COLLECTION_NAME} уже существует.")
 
         # общий счётчик для всех файлов
         global_id = 0
@@ -58,7 +48,7 @@ class SleepAiRagEmbeddingConfig:
             for num, data in enumerate(chunks_data):
                 # Проверяем, существует ли точка уже в Qdrant
                 exists = qdrant_client.count(
-                    collection_name=COLLECTION_NAME,
+                    collection_name=config.COLLECTION_NAME,
                     count_filter=models.Filter(
                         must=[
                             models.FieldCondition(
@@ -97,16 +87,16 @@ class SleepAiRagEmbeddingConfig:
             global_id += len(chunks_data)
 
             log.info(f"Загрузка {len(all_points)} точек в Qdrant...")
-            for batch_start_index in tqdm(range(0, len(all_points), BATCH_SIZE), desc="Qdrant upload"):
-                batch_points = all_points[batch_start_index:batch_start_index + BATCH_SIZE]
+            for batch_start_index in tqdm(range(0, len(all_points), config.BATCH_SIZE), desc="Qdrant upload"):
+                batch_points = all_points[batch_start_index:batch_start_index + config.BATCH_SIZE]
                 qdrant_client.upsert(
-                    collection_name=COLLECTION_NAME,
+                    collection_name=config.COLLECTION_NAME,
                     points=batch_points,
                     wait=True
                 )
 
         log.info("\n✅ Загрузка всех файлов завершена!")
-        info = qdrant_client.get_collection(collection_name=COLLECTION_NAME)
+        info = qdrant_client.get_collection(collection_name=config.COLLECTION_NAME)
         log.info(f"Текущее количество точек: {info.points_count}")
 
 
@@ -153,12 +143,12 @@ class SleepAiRagEmbeddingConfig:
     @staticmethod
     def get_batch_embeddings(merged_list: list) -> list:
         all_embeddings = []
-        for i in tqdm(range(0, len(merged_list), BATCH_SIZE), desc="Получение эмбеддингов"):
-            batch = merged_list[i:i + BATCH_SIZE]
+        for i in tqdm(range(0, len(merged_list), config.BATCH_SIZE), desc="Получение эмбеддингов"):
+            batch = merged_list[i:i + config.BATCH_SIZE]
             for item in batch:
                 combined_text = f"{item['advice']}\n{item['advice_text']}\n\n{item['longrid']}\n{item['longrid_text']}".strip()
                 response = client.models.embed_content(
-                    model=EMBEDDING_MODEL_ID,
+                    model=config.EMBEDDING_MODEL_ID,
                     contents=[combined_text],
                     config=types.EmbedContentConfig(
                         task_type="retrieval_document",

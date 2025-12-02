@@ -21,12 +21,8 @@ from .exceptions import (
     SleepAiErrorConnect
 )
 from app.include.logging_config import logger as log
+from include.config import config
 
-
-load_dotenv()
-
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-MODEL = os.getenv("MODEL")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -49,7 +45,7 @@ def extract_full_block(block: dict) -> dict:
     return result
 
 async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
-    if not DEEPSEEK_API_KEY:
+    if not config.DEEPSEEK_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
     
     system_instruction = (BASE_DIR / "context" / "2025-11-12-instruction.txt").read_text()
@@ -66,8 +62,8 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
     
     agent_helper = create_agent(
         model=ChatDeepSeek(
-            api_key=DEEPSEEK_API_KEY,
-            model=MODEL,
+            api_key=config.DEEPSEEK_API_KEY,
+            model=config.MODEL,
             temperature=0.1,
         ),
         system_prompt=help_model_system_instruction,
@@ -92,7 +88,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
         try:
             agent = create_agent(
                 model=ChatDeepSeek(
-                    api_key=DEEPSEEK_API_KEY,
+                    api_key=config.DEEPSEEK_API_KEY,
                     model="deepseek-chat",
                     temperature=0.14,
                     max_tokens=1000,

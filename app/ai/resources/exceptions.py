@@ -77,6 +77,10 @@ class AppHTTPException(HTTPException):
         return response
 
 
+class WrongSecretError(AppHTTPException):
+    http_code = status.HTTP_403_FORBIDDEN
+    user_message = "Wrong secret key"
+
 class SleepAiErrorGeneration(AppHTTPException):
     http_code = status.HTTP_504_GATEWAY_TIMEOUT
     user_message = "Error Generation from SleepAi"

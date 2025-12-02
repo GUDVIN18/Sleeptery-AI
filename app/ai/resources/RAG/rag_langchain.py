@@ -5,24 +5,21 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest_models
 import time
+from include.config import config
 
-
-GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
-EMBEDDING_MODEL_ID = os.getenv("EMBEDDING_MODEL_ID")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 client = QdrantClient(host="qdrant", port=6333)
 
 embeddings = GoogleGenerativeAIEmbeddings(
-    model=f"models/{EMBEDDING_MODEL_ID}",
-    google_api_key=GEMINI_API_KEY,
+    model=f"models/{config.EMBEDDING_MODEL_ID}",
+    google_api_key=config.GEMINI_API_KEY,
     task_type="retrieval_query"
 )
 
 def get_vector_store():
     return QdrantVectorStore(
         client=client,
-        collection_name=COLLECTION_NAME,
+        collection_name=config.COLLECTION_NAME,
         embedding=embeddings,
         retrieval_mode="dense",
         content_payload_key="text"
