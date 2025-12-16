@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .ai.router import router as incidents_router
+from .sleep_ai.router import router as incidents_router
 
 main_router = APIRouter()
 

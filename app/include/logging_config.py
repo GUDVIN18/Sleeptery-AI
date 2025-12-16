@@ -1,7 +1,7 @@
 from loguru import logger
 import sys
 import os
-from include.config import config
+from app.include.config import config
 
 logger.remove()  # убираем дефолтный логгер Loguru
 logger.add(sys.stdout, format="{time} {level} {message}", level=config.LOG_LEVEL)

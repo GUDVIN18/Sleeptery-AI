@@ -440,7 +440,17 @@ json_user = '''{
   ]
 }'''
 
-response = requests.post("http://82.22.184.82:8881/ai/analyze", json={"sleep_json": json.loads(json_user)})
+
+ACCESS_TOKEN = "2Og799dxj4mw8nW3pfnDnJt1h4R4fs1H"
+
+response = requests.post(
+    "http://82.22.184.82:8881/ai/analyze",
+    headers={
+        "Secret": ACCESS_TOKEN,
+        "Content-Type": "application/json"
+    },
+    json={"sleep_json": json.loads(json_user)},
+)
+
 b = time.time()
-c = b-a
-print(c, response.text)
+print(b - a, response.text)
