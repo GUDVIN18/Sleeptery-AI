@@ -44,14 +44,14 @@ text_splitter = MarkdownHeaderTextSplitter(
 class SleepAiRagEmbeddingConfig:
     @staticmethod
     def run_pipeline(file_paths: list[Path]):
-        if not qdrant_client.collection_exists(collection_name=f"{config.COLLECTION_NAME}_test"):
-            log.info(f"Создание коллекции: {f"{config.COLLECTION_NAME}_test"}")
+        if not qdrant_client.collection_exists(collection_name=f"{config.COLLECTION_NAME_SLEEP_AI}_test"):
+            log.info(f"Создание коллекции: {f"{config.COLLECTION_NAME_SLEEP_AI}_test"}")
             qdrant_client.recreate_collection(
-                collection_name=f"{config.COLLECTION_NAME}_test",
+                collection_name=f"{config.COLLECTION_NAME_SLEEP_AI}_test",
                 vectors_config=VectorParams(size=config.VECTOR_DIMENSION, distance=Distance.COSINE)
             )
         else:
-            log.info(f"Коллекция {f"{config.COLLECTION_NAME}_test"} уже существует.")
+            log.info(f"Коллекция {f"{config.COLLECTION_NAME_SLEEP_AI}_test"} уже существует.")
 
         # общий счётчик для всех файлов
         global_id = 0
@@ -68,7 +68,7 @@ class SleepAiRagEmbeddingConfig:
             for num, data in enumerate(chunks_data):
                 # Проверяем, существует ли точка уже в Qdrant
                 exists = qdrant_client.count(
-                    collection_name=f"{config.COLLECTION_NAME}_test",
+                    collection_name=f"{config.COLLECTION_NAME_SLEEP_AI}_test",
                     count_filter=models.Filter(
                         must=[
                             models.FieldCondition(
@@ -110,13 +110,13 @@ class SleepAiRagEmbeddingConfig:
             for batch_start_index in tqdm(range(0, len(all_points), config.BATCH_SIZE), desc="Qdrant upload"):
                 batch_points = all_points[batch_start_index:batch_start_index + config.BATCH_SIZE]
                 qdrant_client.upsert(
-                    collection_name=f"{config.COLLECTION_NAME}_test",
+                    collection_name=f"{config.COLLECTION_NAME_SLEEP_AI}_test",
                     points=batch_points,
                     wait=True
                 )
 
         log.info("\n✅ Загрузка всех файлов завершена!")
-        info = qdrant_client.get_collection(collection_name=f"{config.COLLECTION_NAME}_test")
+        info = qdrant_client.get_collection(collection_name=f"{config.COLLECTION_NAME_SLEEP_AI}_test")
         log.info(f"Текущее количество точек: {info.points_count}")
 
 
@@ -182,7 +182,7 @@ class SleepAiRagEmbeddingConfig:
 
 
 if __name__ == "__main__":
-    # qdrant_client.delete_collection(collection_name=f"{config.COLLECTION_NAME}_test")
+    # qdrant_client.delete_collection(collection_name=f"{config.COLLECTION_NAME_SLEEP_AI}_test")
     SleepAiRagEmbeddingConfig.run_pipeline(
         file_paths=[
             Path("app/sleep_ai/resources/RAG/knowledge_base/Сон.md"),

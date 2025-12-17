@@ -19,7 +19,8 @@ class Settings(BaseSettings):
 
     QDRANT_HOST: str = Field(..., env="QDRANT_HOST")
     QDRANT_PORT: int = Field(..., env="QDRANT_PORT")
-    COLLECTION_NAME: str = Field(..., env="COLLECTION_NAME")
+    COLLECTION_NAME_SLEEP_AI: str = Field(..., env="COLLECTION_NAME_SLEEP_AI")
+    COLLECTION_NAME_DIALOG_AI: str = Field(..., env="COLLECTION_NAME_DIALOG_AI")
     VECTOR_DIMENSION: int = Field(..., env="VECTOR_DIMENSION")
     BATCH_SIZE: int = Field(..., env="BATCH_SIZE")
 

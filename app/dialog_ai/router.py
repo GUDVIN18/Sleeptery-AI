@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import Connection
 from typing import List, Dict, Any
-from .resources.schemas.dialog import ResponseSleepAi, UploadSleepAi
+from .resources.schemas.dialog import ResponseDialogAi, UploadDialogAi
 from .resources.pipline import geration_pipe
 # from loguru import logger as log
 from app.include.logging_config import logger as log
@@ -13,16 +13,17 @@ router = APIRouter()
 
 @router.post(
     "/dialog",
-    response_model=None,
+    response_model=ResponseDialogAi,
     dependencies=[Depends(secret_access)],
     name="Задать вопрос и получить ответ",
 )
 async def dialog(
-    user_id: int,
-    # sleep_date: str,
+    data: UploadDialogAi,
 ):
-    dialogai_answer = await geration_pipe(user_id)
-    return True
+    dialogai_answer = await geration_pipe(data=data)
+    return ResponseDialogAi(
+        answer=dialogai_answer.answer
+    )
 
 @router.get(
     "/history",

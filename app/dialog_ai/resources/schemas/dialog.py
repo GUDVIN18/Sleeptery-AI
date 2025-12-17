@@ -1,34 +1,33 @@
 from pydantic import BaseModel, Field
 from dataclasses import dataclass
 from typing import Any, Dict
+import datetime as dt
 
 
-@dataclass
-class ResponseFormat:
-    analysis: list
-
+# Для пайплайна
 @dataclass
 class ResponseFormatAi(BaseModel):
-    reasoning: str = Field(
-        description="Скрытый этап. 1) Анализ динамики (лучше/хуже). 2) Выбор факта из RAG (механизм). 3) Проверка History (не повторяться!). 4) Формирование гипотезы."
+    answer: str = Field(
+        description="Ответ AI"
     )
-    sleep_assessment: str = Field(
-        description="10-20 токенов. Анализ качества ночи (динамика восстановления и пробуждений). Без сухих цифр."
-    )
-    response: str = Field(
-        description="60-80 токенов. Основной совет. Структура: 'Инсайт из RAG (почему это так)' -> 'Мягкая рекомендация (что сделать)'."
-    )
-    diary: str = Field(
-        description="СТРОГАЯ ЛОГИКА: Если в поле 'response' ты предложил конкретное действие/миссию — призови записать ИМЕННО ЭТО в дневник. Если совет теоретический — просто напомни заполнить дневник."
+    # history_dialog = Field(
+    #     description="История диалога"
+    # )
+
+
+# для fastapi роутера
+class ResponseDialogAi(BaseModel):
+    answer: str = Field(
+        description="Ответ AI"
     )
 
-class ResponseSleepAi(BaseModel):
-    sleep_assessment: str = Field(
-        description="Анализ"
+class UploadDialogAi(BaseModel):
+    question: str = Field(
+        description="Вопрос пользователя"
     )
-    response: str = Field(
-        description="Совет"
+    user_id: int = Field(
+        description="Уникальный идентификатор пользователя"
     )
-
-class UploadSleepAi(BaseModel):
-    sleep_json: Dict[str, Any]
+    sleep_data: dt.date = Field(
+        description="Дата сна"
+    )

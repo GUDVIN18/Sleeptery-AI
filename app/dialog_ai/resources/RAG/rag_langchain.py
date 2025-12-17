@@ -19,69 +19,28 @@ embeddings = QwenEmbedding(
 )
 def get_vector_store(is_test):
     if is_test:
-        test_collection_name = f"{config.COLLECTION_NAME}_test"
+        test_collection_name = f"{config.COLLECTION_NAME_DIALOG_AI}_test"
         return QdrantVectorStore(
             client=QdrantClient(host="localhost", port=6445),
             collection_name=test_collection_name,
             embedding=embeddings,
             retrieval_mode="dense",
-            content_payload_key="text"
+            content_payload_key="content",
+            metadata_payload_key="payload"
         )
     else:
         return QdrantVectorStore(
             client=client,
-            collection_name=config.COLLECTION_NAME,
+            collection_name=config.COLLECTION_NAME_DIALOG_AI,
             embedding=embeddings,
             retrieval_mode="dense",
-            content_payload_key="text"
+            content_payload_key="content",
+            metadata_payload_key="payload"
         )
 
-async def retrieve_context(
-        topics: list[str],
+async def retriever_context(
         is_test: bool = False,
     ):
     vector_store = get_vector_store(is_test)
-    results_list = []
-    
-    for topic in topics:
-        filter_condition = rest_models.Filter(
-            must=[
-                rest_models.FieldCondition(
-                    key="advice", 
-                    # match=rest_models.MatchValue(value=topic)
-                    match=rest_models.MatchText(text=topic) 
-                )
-            ]
-        )
-
-        docs = await vector_store.asimilarity_search(
-            query=topic,
-            k=3,
-            filter=filter_condition 
-        )
-        if docs:
-            results_list.append(docs)
-
-    cleaned_contexts = []
-    
-    for docs in results_list:
-        if not docs:
-            continue # Если ничего не нашлось по фильтру
-            
-        for doc in docs:
-            cleaned_contexts.append({
-                "text": doc.page_content, 
-            })
-
-    return cleaned_contexts
-
-
-if __name__ == "__main__":
-    a = time.time()
-    query = ['Совет 31: Режим сна', 'Совет 4: Сколько нужно спать?'] 
-    results = asyncio.run(retrieve_context(query, is_test=True))
-
-    for res in results:
-        print(res)
-    b = time.time()
-    print(f"{b-a}")
+    retriever = vector_store.as_retriever()
+    return retriever
