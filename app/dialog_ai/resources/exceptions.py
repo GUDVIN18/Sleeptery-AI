@@ -94,3 +94,7 @@ class DialogAiErrorFormat(AppHTTPException):
 class DialogAiErrorConnect(AppHTTPException):
     http_code = status.HTTP_502_BAD_GATEWAY
     user_message = "Error connect to DialogAi"
+
+class DialogAiContentBlocked(AppHTTPException):
+    http_code = status.HTTP_504_GATEWAY_TIMEOUT
+    user_message = "Content is blocked by DialogAi"

@@ -441,15 +441,15 @@ json_user = '''{
 }'''
 
 
-ACCESS_TOKEN = "2Og799dxj4mw8nW3pfnDnJt1h4R4fs1H"
 
-response = requests.post(
-    "http://82.22.184.82:8881/ai/analyze",
-    headers={
-        "Secret": ACCESS_TOKEN,
-        "Content-Type": "application/json"
+response = requests.get(
+    "https://analytics.sleeptery.xdev.team/dialog-ai/inner/history", 
+    params={
+        'user_id': 580,
+        'sleep_date': '2025-12-28',
+        'page_size': 100
     },
-    json={"sleep_json": json.loads(json_user)},
+    headers={'Authorization': f'Bearer 2Og799dxj4mw8nW3pfnDnJt1h4R4fs1H'}
 )
 
 b = time.time()

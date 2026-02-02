@@ -1,9 +1,7 @@
 from pathlib import Path
 from app.include.logging_config import logger as log
 from qdrant_client import QdrantClient, models
-from qdrant_client.models import Distance, VectorParams
 from tqdm import tqdm
-from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from app.include.config import config
 from app.include.embeddings.qwen_embedding import QwenEmbedding
 import uuid

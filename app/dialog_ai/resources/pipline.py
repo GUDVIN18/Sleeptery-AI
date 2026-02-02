@@ -4,7 +4,6 @@ import json
 import os
 import traceback
 from typing import List
-from redis import asyncio as aredis
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_openai import ChatOpenAI
@@ -17,13 +16,20 @@ from langchain_classic.chains.history_aware_retriever import create_history_awar
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains.retrieval import create_retrieval_chain
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from .redis_client import RedisClient
 from .RAG.rag_langchain import retriever_context
-from .schemas.dialog import ResponseFormatAi, UploadDialogAi
+from .schemas.dialog import (
+    ResponseFormatAi, 
+    UploadDialogAi, 
+    ResponseDialogAi
+)
 from .exceptions import (
     DialogAiErrorConnect,
     DialogAiErrorGeneration,
     DialogAiErrorFormat,
+    DialogAiContentBlocked
 )
 from langchain_qdrant import QdrantVectorStore
 from app.include.logging_config import logger as log
@@ -32,91 +38,130 @@ from app.include.config import config
     
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-async def geration_pipe(data: UploadDialogAi) -> ResponseFormatAi:
+async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
     if not config.QWEN_API_KEY:
         raise DialogAiErrorConnect("API key is not set.")
     
     system_instruction = (BASE_DIR / "context" / "2025-12-12-instruction.txt").read_text()
     contextualize_q_system_prompt = (BASE_DIR / "context" / "2025-12-16-contextualize_prompt.txt").read_text()
-    # help_model_system_instruction = (BASE_DIR / "context" / "2025-11-17-help_model.txt").read_text()
+   
+    # Получаем историю
+    chat_history_obj = RedisClient(
+        session_id=f"{data.user_id}_{data.sleep_date}"
+    ).get_session_history_v2(
+        user_id=data.user_id,
+        sleep_date=data.sleep_date
+    )
+    current_history = chat_history_obj
+    log.info(f"[{data.user_id}] History loaded: {len(current_history)} messages.")
 
-    retriever = await retriever_context(is_test=True) #
-    parser = PydanticOutputParser(pydantic_object=ResponseFormatAi)
-    format_instructions = parser.get_format_instructions()
+    llm_helper = ChatQwQ(
+        api_key=config.QWEN_API_KEY,
+        model=config.MODEL_DIALOG_AI,
+        temperature=0.1,
+        top_p=0.95,
+        extra_body={
+            "enable_thinking": True,
+            "thinking_budget": 60,
+        },
+    )
+    main_llm=ChatQwQ(
+        api_key=config.QWEN_API_KEY,
+        model=config.MODEL_DIALOG_AI,
+        temperature=0.4,
+        top_p=0.95,
+        extra_body={
+            "enable_thinking": True,
+            "thinking_budget": 150,
+        },
+    )
     try:
-        llm=ChatQwQ(
-            api_key=config.QWEN_API_KEY,
-            model=config.MODEL_DIALOG_AI,
-            temperature=0.12,
-            top_p=0.95,
-            extra_body={
-                "enable_thinking": True,
-                "thinking_budget": 100,
-            },
-        )
+        context_prompt_helper = ChatPromptTemplate.from_messages([
+            ("system", contextualize_q_system_prompt),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{input}"),
+        ])
+    
+        chain_context = context_prompt_helper | llm_helper
+        result = await chain_context.ainvoke({
+            "chat_history": current_history,
+            "input": data.message
+        })
+        search_query = result.content
+        log.info(f"[{data.user_id}] Rewritten query: {search_query}")
 
-        # Его задача: если вопрос зависит от истории, переформулировать его.
-        contextualize_q_prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", contextualize_q_system_prompt),
-                MessagesPlaceholder("chat_history"),
-                ("human", "{input}"),
-            ]
-        )
-        history_aware_retriever = create_history_aware_retriever(
-            llm, retriever, contextualize_q_prompt
-        )
-
-        qa_prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", f"{system_instruction}"),
-                ("system", "Ты максимально кратко и по существу отвечаешь на вопросы пользователей, используя предоставленный контекст. Никогда не придумывай ответ самостоятельно."),
-                # Сюда еще нужно передать совет по сну
-                # Сюда сам сон
-                ("system", "Используй следующие контекстные данные для ответа на вопрос: {context}"),
-                MessagesPlaceholder("chat_history"),
-                ("human", "{input}"),
-            ]
-        ).partial(format_instructions=format_instructions)
+        # Поиск в векторной базе (Ретривер)
+        log.info(f"[{data.user_id}] Searching vector DB...")
+        retriever = await retriever_context(is_test=True)
+        docs = await retriever.ainvoke(search_query)
+        context_text = "\n\n".join([doc.page_content for doc in docs])
+        log.info(f"[{data.user_id}] Found {len(docs)} relevant documents.\n\n{context_text=}")
 
 
-       
-        question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+        if data.sleep_json:
+            sleep_data_str = json.dumps(data.sleep_json, ensure_ascii=False).replace("{", "").replace("}", "")
+        else:
+            sleep_data_str="Не предоставлены"
 
-        # Объединяем всё в RAG цепочку
-        rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
-        
-        # Получаем историю диалога пользователя из redis по ключу user_id
-        final_rag_chain = RunnableWithMessageHistory(
-            rag_chain,
-            RedisClient(
-                session_id=f"{data.user_id}_{data.sleep_data}"
-            ).get_session_history,
-            input_messages_key="input",
-            history_messages_key="chat_history",
-            output_messages_key="answer",
-        )
-        
-        response = await final_rag_chain.ainvoke({"input": data.question})
 
-        log.info(f"{response["context"]}")
-        log.success(f"{data.user_id} QWEN response: {response['answer']}")
-        return response['answer']
+        qa_prompt = ChatPromptTemplate.from_messages([
+            ("system", f"Данные сна (ПЕРЕВЕДИ В ЧАСЫ): {sleep_data_str}"),
+            ("system", f"Рекомендация по улучшению сна: {data.sleep_assessment or 'Не предоставлен'}"),
+            ("system", system_instruction),
+            ("system", "Контекст из базы знаний для ответа на вопрос: {context}"),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ])
+
+        chain_context = qa_prompt | main_llm 
+        response = await chain_context.ainvoke({
+            "context": context_text,
+            "chat_history": current_history,
+            "input": data.message
+        })
     except Exception as e:
-        log.warning(f"QWEN generation failed: {e}")
+        if "data_inspection_failed" in str(e):
+            log.error(f"Content blocked")
+            raise DialogAiContentBlocked
+        else:
+            log.error(f"Error during generation: \n{traceback.format_exc()}")
+            raise DialogAiErrorGeneration
 
-        # await asyncio.sleep(1)
+    log.info(f"Final answer: {response}")
 
+    if response is None:
+        log.error(f"Error response is None: \n{traceback.format_exc()}")
+        raise DialogAiErrorGeneration
 
-    # log.error(f"All attempts failed: {last_exception}")
-    # return
+    RedisClient(
+        session_id=f"{data.user_id}_{data.sleep_date}"
+    ).add_message(
+        role="user",
+        message=data.message
+    )
+    
+    RedisClient(
+        session_id=f"{data.user_id}_{data.sleep_date}"
+    ).add_message(
+        role="ai",
+        message=response.content
+    )
 
+    return ResponseDialogAi(
+        answer=response.content
+    )
 
 if __name__ == "__main__":
-    user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep.json"
+    user_prompt_path = "app/dialog_ai/resources/dialog.json"
     with open(user_prompt_path, "r") as f:
-        sleep_data = f.read()
+        sleep_json = json.load(f)
 
     asyncio.run(geration_pipe(
-        data=UploadDialogAi(user_id=580, question="Я работаю до ночи, как мне победить бессоницу?", sleep_data="2025-12-16")
+        data=UploadDialogAi(
+            user_id=5801, 
+            message="Привет, как улучшить сон?", 
+            sleep_json=None,
+            sleep_assessment=None,
+            sleep_date="2025-12-24")
     ))
+

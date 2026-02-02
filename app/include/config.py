@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_ID: str = Field(..., env="EMBEDDING_MODEL_ID")
     MODEL_SLEEP_AI: str = Field(..., env="MODEL_SLEEP_AI")
     MODEL_DIALOG_AI: str = Field(..., env="MODEL_DIALOG_AI")
+    CHAT_HISTORY_URL: str = Field(..., env="CHAT_HISTORY_URL")
 
     QDRANT_HOST: str = Field(..., env="QDRANT_HOST")
     QDRANT_PORT: int = Field(..., env="QDRANT_PORT")
