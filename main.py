@@ -1,8 +1,10 @@
+from app.include.logging_config import logger as log
 from fastapi import Depends, FastAPI
 from fastapi.security import APIKeyHeader
 from app.router import main_router
 
 
+log.success("Starting Microservice AI...")
 app = FastAPI(
     title="Microservice AI",
     version="0.1.0",
