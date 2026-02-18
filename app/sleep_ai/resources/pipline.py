@@ -47,70 +47,76 @@ def extract_full_block(block: dict) -> dict:
     return result
 
 async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
-    if not config.QWEN_API_KEY:
-        raise SleepAiErrorConnect("API key is not set.")
-    
-    system_instruction = (BASE_DIR / "context" / "2025-11-12-instruction.txt").read_text()
-    help_model_system_instruction = (BASE_DIR / "context" / "2025-11-17-help_model.txt").read_text()
-
-    user_diary_records = extract_full_block(sleep_data["user_diary_records"])
-    sleep_daily_stats = extract_full_block(sleep_data["sleep_daily_stats"])
-    sleep_weekly_stats = {
-        date: extract_full_block(day)
-        for date, day in sleep_data["sleep_weekly_stats"].items()
-    }
-    history_sleep_assessment = [
-        extract_full_block(day)
-        for day in sleep_data["history_sleep_assessment"]
-    ]
-    
-    agent_helper = create_agent(
-        model=ChatQwQ(
-            api_key=config.QWEN_API_KEY,
-            model="qwen-flash",
-            temperature=0.05,
-            extra_body={
-                "enable_thinking": True,
-                "thinking_budget": 120,
-            },
-        ),
-        # model=ChatDeepSeek(
-        #     api_key=config.DEEPSEEK_API_KEY,
-        #     model="deepseek-chat",
-        #     temperature=0,
-        #     max_retries=4,
-        # ),
-        # model=ChatGoogleGenerativeAI(
-        #     google_api_key=config.GEMINI_API_KEY,
-        #     model="gemini-2.5-flash",
-        #     temperature=0.1,
-        # ),
-        # model=ChatOpenAI(
-        #     api_key=config.OPENAI_API_KEY,
-        #     model="gpt-5-nano",
-        #     max_retries=4,
-        #     temperature=0
-        # ),
-        system_prompt=help_model_system_instruction,
-        response_format=ResponseFormat
-    )
-
-    helper_analytics = await agent_helper.ainvoke(
-        {"messages": 
-            [
-                {"role": "user", "content": f"Данные сна: {sleep_data}"},
-            ]
-        }
-    )
-    problems = helper_analytics['structured_response'].analysis
-    log.info(f"Extracted problems: {problems} ")
-
-    rag_answer = await retrieve_context(topics=problems, is_test=config.TEST_MODE_DB)
-    log.info(f"{rag_answer}")
-
-    # last_exception = None
-    # for attempt in range(3):
     try:
+        log.info(f"Успешно зашли в geration_pipe")
+        if not config.QWEN_API_KEY:
+            raise SleepAiErrorConnect("API key is not set.")
+        
+        system_instruction = (BASE_DIR / "context" / "2025-11-12-instruction.txt").read_text()
+        help_model_system_instruction = (BASE_DIR / "context" / "2025-11-17-help_model.txt").read_text()
+
+        user_diary_records = extract_full_block(sleep_data["user_diary_records"])
+        sleep_daily_stats = extract_full_block(sleep_data["sleep_daily_stats"])
+        sleep_weekly_stats = {
+            date: extract_full_block(day)
+            for date, day in sleep_data["sleep_weekly_stats"].items()
+        }
+        history_sleep_assessment = [
+            extract_full_block(day)
+            for day in sleep_data["history_sleep_assessment"]
+        ]
+
+        log.info(f"Успешно перешли к инициализации agent_helper")
+        
+        agent_helper = create_agent(
+            model=ChatQwQ(
+                api_key=config.QWEN_API_KEY,
+                model="qwen-flash",
+                temperature=0.05,
+                extra_body={
+                    "enable_thinking": True,
+                    "thinking_budget": 200,
+                },
+            ),
+            # model=ChatDeepSeek(
+            #     api_key=config.DEEPSEEK_API_KEY,
+            #     model="deepseek-chat",
+            #     temperature=0,
+            #     max_retries=4,
+            # ),
+            # model=ChatGoogleGenerativeAI(
+            #     google_api_key=config.GEMINI_API_KEY,
+            #     model="gemini-2.5-flash",
+            #     temperature=0.1,
+            # ),
+            # model=ChatOpenAI(
+            #     api_key=config.OPENAI_API_KEY,
+            #     model="gpt-5-nano",
+            #     max_retries=4,
+            #     temperature=0
+            # ),
+            system_prompt=help_model_system_instruction,
+            response_format=ResponseFormat
+        )
+
+        helper_analytics = await agent_helper.ainvoke(
+            {"messages": 
+                [
+                    {"role": "user", "content": f"Данные сна: {sleep_data}"},
+                ]
+            }
+        )
+        problems = helper_analytics['structured_response'].analysis
+        log.info(f"Extracted problems: {problems} ")
+
+        rag_answer = await retrieve_context(topics=problems, is_test=config.TEST_MODE_DB)
+        log.info(f"{rag_answer}")
+    except Exception as e:
+        log.error(f"Error during preparation for main generation: {e}")
+        raise SleepAiErrorGeneration
+    
+    try:
+        log.info(f"Успешно перешли к инициализации main_agent")
         agent = create_agent(
             model=ChatQwQ(
                 api_key=config.QWEN_API_KEY,
@@ -119,7 +125,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
                 top_p=0.95,
                 extra_body={
                     "enable_thinking": True,
-                    "thinking_budget": 600,
+                    "thinking_budget": 1000,
                 },
             ),
             system_prompt=system_instruction,

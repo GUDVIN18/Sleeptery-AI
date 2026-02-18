@@ -18,10 +18,15 @@ router = APIRouter()
     name="Получить совет от SleepAI",
 )
 async def analyze_sleep(data: UploadSleepAi):
-    log.success(f"Успешно приняли sleep_json!")
-    sleepai_answer = await geration_pipe(data.sleep_json)
-    return ResponseSleepAi(
-        sleep_assessment=sleepai_answer.sleep_assessment,
-        response=f"{sleepai_answer.response} {sleepai_answer.diary_recommendation}",
-        mission=sleepai_answer.mission,
-    )
+    log.info(f" [[[ \n {data} \n]]]")
+    try:
+        log.success(f"Успешно приняли sleep_json!")
+        sleepai_answer = await geration_pipe(data.sleep_json)
+        return ResponseSleepAi(
+            sleep_assessment=sleepai_answer.sleep_assessment,
+            response=f"{sleepai_answer.response} {sleepai_answer.diary_recommendation}",
+            mission=sleepai_answer.mission,
+        )
+    except Exception as e:
+        log.error(f"Ошибка при анализе сна: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка при анализе сна")
