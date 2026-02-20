@@ -27,6 +27,12 @@ from app.include.config import config
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+try:
+    SYSTEM_INSTRUCTION = (BASE_DIR / "context" / "2025-11-12-instruction.txt").read_text(encoding="utf-8")
+    HELP_MODEL_INSTRUCTION = (BASE_DIR / "context" / "2025-11-17-help_model.txt").read_text(encoding="utf-8")
+except FileNotFoundError as e:
+    log.error(f"Failed to load prompt templates: {e}")
+    raise
 
 def extract_full_block(block: dict) -> dict:
     result = {}
@@ -51,9 +57,6 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
         log.info(f"Успешно зашли в geration_pipe")
         if not config.QWEN_API_KEY:
             raise SleepAiErrorConnect("API key is not set.")
-        
-        system_instruction = (BASE_DIR / "context" / "2025-11-12-instruction.txt").read_text()
-        help_model_system_instruction = (BASE_DIR / "context" / "2025-11-17-help_model.txt").read_text()
 
         user_diary_records = extract_full_block(sleep_data["user_diary_records"])
         sleep_daily_stats = extract_full_block(sleep_data["sleep_daily_stats"])
@@ -95,7 +98,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
             #     max_retries=4,
             #     temperature=0
             # ),
-            system_prompt=help_model_system_instruction,
+            system_prompt=HELP_MODEL_INSTRUCTION,
             response_format=ResponseFormat
         )
 
@@ -128,7 +131,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
                     "thinking_budget": 1000,
                 },
             ),
-            system_prompt=system_instruction,
+            system_prompt=SYSTEM_INSTRUCTION,
             response_format=ResponseFormatAi,
         )
         response = await agent.ainvoke(
