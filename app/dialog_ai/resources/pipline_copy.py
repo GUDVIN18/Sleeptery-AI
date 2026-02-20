@@ -42,7 +42,7 @@ async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
         raise DialogAiErrorConnect("API key is not set.")
     
     system_instruction = (BASE_DIR / "context" / "2025-12-12-instruction.txt").read_text()
-    contextualize_q_system_prompt = (BASE_DIR / "context" / "2025-12-16-contextualize_prompt.txt").read_text()
+    contextualize_q_system_prompt = (BASE_DIR / "context" / "2026-02-20-contextualize_prompt.txt").read_text()
    
     retriever = await retriever_context(is_test=True)
     parser = PydanticOutputParser(pydantic_object=ResponseFormatAi)

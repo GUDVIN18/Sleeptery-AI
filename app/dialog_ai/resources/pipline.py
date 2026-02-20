@@ -37,13 +37,15 @@ from app.include.config import config
 
     
 BASE_DIR = Path(__file__).resolve().parent.parent
+try:
+    SYSTEM_INSTRUCTION = (BASE_DIR / "context" / "2025-12-12-instruction.txt").read_text(encoding="utf-8")
+    CONTEXT_PROMPT = (BASE_DIR / "context" / "2026-02-20-contextualize_prompt.txt.txt").read_text(encoding="utf-8")
+except Exception as e:
+    log.error(f"Failed to load prompts: {e}")
 
 async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
     if not config.QWEN_API_KEY:
         raise DialogAiErrorConnect("API key is not set.")
-    
-    system_instruction = (BASE_DIR / "context" / "2025-12-12-instruction.txt").read_text()
-    contextualize_q_system_prompt = (BASE_DIR / "context" / "2025-12-16-contextualize_prompt.txt").read_text()
    
     # Получаем историю
     chat_history_obj = RedisClient(
@@ -62,7 +64,7 @@ async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
         top_p=0.95,
         extra_body={
             "enable_thinking": True,
-            "thinking_budget": 60,
+            "thinking_budget": 120,
         },
     )
     main_llm=ChatQwQ(
@@ -72,12 +74,12 @@ async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
         top_p=0.95,
         extra_body={
             "enable_thinking": True,
-            "thinking_budget": 150,
+            "thinking_budget": 350,
         },
     )
     try:
         context_prompt_helper = ChatPromptTemplate.from_messages([
-            ("system", contextualize_q_system_prompt),
+            ("system", CONTEXT_PROMPT),
             MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}"),
         ])
@@ -107,7 +109,7 @@ async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
         qa_prompt = ChatPromptTemplate.from_messages([
             ("system", f"Данные сна (ПЕРЕВЕДИ В ЧАСЫ): {sleep_data_str}"),
             ("system", f"Рекомендация по улучшению сна: {data.sleep_assessment or 'Не предоставлен'}"),
-            ("system", system_instruction),
+            ("system", SYSTEM_INSTRUCTION),
             ("system", "Контекст из базы знаний для ответа на вопрос: {context}"),
             MessagesPlaceholder("chat_history"),
             ("human", "{input}"),
