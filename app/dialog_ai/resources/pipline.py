@@ -39,7 +39,7 @@ from app.include.config import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 try:
     SYSTEM_INSTRUCTION = (BASE_DIR / "context" / "2025-12-12-instruction.txt").read_text(encoding="utf-8")
-    CONTEXT_PROMPT = (BASE_DIR / "context" / "2026-02-20-contextualize_prompt.txt.txt").read_text(encoding="utf-8")
+    CONTEXT_PROMPT = (BASE_DIR / "context" / "2026-02-20-contextualize_prompt.txt").read_text(encoding="utf-8")
 except Exception as e:
     log.error(f"Failed to load prompts: {e}")
 
