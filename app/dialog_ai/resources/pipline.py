@@ -94,7 +94,7 @@ async def geration_pipe(data: UploadDialogAi) -> ResponseDialogAi:
 
         # Поиск в векторной базе (Ретривер)
         log.info(f"[{data.user_id}] Searching vector DB...")
-        retriever = await retriever_context(is_test=True)
+        retriever = await retriever_context(is_test=config.TEST_MODE_DB)
         docs = await retriever.ainvoke(search_query)
         context_text = "\n\n".join([doc.page_content for doc in docs])
         log.info(f"[{data.user_id}] Found {len(docs)} relevant documents.\n\n{context_text=}")

@@ -6,27 +6,34 @@ from app.include.config import config
 from app.include.embeddings.qwen_embedding import QwenEmbedding
 import uuid
 from .create_md_2 import process_book_with_ai
+from qdrant_client.models import Distance, VectorParams
 
 
+# запуск скрипта строго локально. python -m app.dialog_ai.resources.RAG.qdrant_loader
 embeddings_qwen = QwenEmbedding(
     model=config.EMBEDDING_MODEL_ID,
     dimensions=config.VECTOR_DIMENSION
 )
 
-qdrant_client = QdrantClient(host="localhost", port=6445)
+qdrant_client = QdrantClient(host="localhost", port=config.QDRANT_PORT)
 
 class SleepAiRagEmbeddingConfig:
     @staticmethod
     def run_pipeline(file_paths: list[Path]):
         # Пересоздаем коллекцию для чистоты теста
-        # if qdrant_client.collection_exists(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}_test"):
-        #     qdrant_client.delete_collection(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}_test")
+        # if qdrant_client.collection_exists(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}"):
+        #     qdrant_client.delete_collection(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}")
             
-        # log.info(f"Создание коллекции: {f'{config.COLLECTION_NAME_DIALOG_AI}_test'}")
+        # log.info(f"Создание коллекции: {f'{config.COLLECTION_NAME_DIALOG_AI}'}")
         # qdrant_client.recreate_collection(
-        #     collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}_test",
+        #     collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}",
         #     vectors_config=VectorParams(size=config.VECTOR_DIMENSION, distance=Distance.COSINE)
         # )
+        try:
+            log.info(f"{qdrant_client.get_collections()}")
+        except Exception as e:
+            log.error(f"Failed to connect to Qdrant: {e}")
+            return
 
         for file in file_paths:
             log.info(f"\n📘 Обработка файла: {file.name}")
@@ -67,7 +74,7 @@ class SleepAiRagEmbeddingConfig:
             for batch_start in tqdm(range(0, len(points), config.BATCH_SIZE)):
                 batch_points = points[batch_start:batch_start + config.BATCH_SIZE]
                 qdrant_client.upsert(
-                    collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}_test",
+                    collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}",
                     points=batch_points
                 )
 
@@ -87,6 +94,7 @@ if __name__ == "__main__":
     SleepAiRagEmbeddingConfig.run_pipeline(
         file_paths=[
             # Path("app/dialog_ai/resources/RAG/knowledge_base/book_1-56.pdf"),
-            Path("app/dialog_ai/resources/RAG/knowledge_base/book_56-282pdf.pdf")
+            # Path("app/dialog_ai/resources/RAG/knowledge_base/book_56-282pdf.pdf")
+            Path("app/dialog_ai/resources/RAG/knowledge_base/book_1-56.md")
         ] 
     )
