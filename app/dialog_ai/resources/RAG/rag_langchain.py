@@ -73,8 +73,8 @@ async def retriever_context(is_test: bool = False):
 
         reranker = FlashrankRerank(
             client=flashrank_client,
-            model="ms-marco-TinyBERT-L-2-v2", 
-            top_n=7
+            model=config.FLASH_RANK_MODEL, 
+            top_n=10
         )
 
         pipeline_compressor = DocumentCompressorPipeline(

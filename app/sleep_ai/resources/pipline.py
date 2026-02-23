@@ -74,7 +74,8 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
         agent_helper = create_agent(
             model=ChatQwQ(
                 api_key=config.QWEN_API_KEY,
-                model="qwen-flash",
+                # model="qwen-flash",
+                model=config.MODEL_SLEEP_AI,
                 temperature=0.05,
                 extra_body={
                     "enable_thinking": True,
@@ -128,7 +129,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
                 top_p=0.95,
                 extra_body={
                     "enable_thinking": True,
-                    "thinking_budget": 1000,
+                    "thinking_budget": 1300,
                 },
             ),
             system_prompt=SYSTEM_INSTRUCTION,

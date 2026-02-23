@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     COLLECTION_NAME_DIALOG_AI: str = Field(..., env="COLLECTION_NAME_DIALOG_AI")
     VECTOR_DIMENSION: int = Field(..., env="VECTOR_DIMENSION")
     BATCH_SIZE: int = Field(..., env="BATCH_SIZE")
+    FLASH_RANK_MODEL: str = Field(..., env="FLASH_RANK_MODEL")
 
     model_config = SettingsConfigDict(
         env_file=".env",
