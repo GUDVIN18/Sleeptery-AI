@@ -79,7 +79,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
                 temperature=0.05,
                 extra_body={
                     "enable_thinking": True,
-                    "thinking_budget": 200,
+                    "thinking_budget": 300,
                 },
             ),
             # model=ChatDeepSeek(
@@ -149,7 +149,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
                             "Ниже приведёна 'База знаний Sleeptery'— достоверные научные материалы и объяснения, "
                             "полученные сонологом. "
                             "Ты обязан опираться строго на них при анализе сна и формулировке ответа.\n\n"
-                            f"<RAG_CONTEXT>\n{rag_answer}\n</RAG_CONTEXT>\n"
+                            f"<KNOWLEDGE_BASE>\n{rag_answer}\n</KNOWLEDGE_BASE>\n"
                             "Используй его как главный источник истины при рассуждениях."
                         ),
                     },
@@ -186,7 +186,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
         #                 "Ниже приведёна 'База знаний Sleeptery'— достоверные научные материалы и объяснения, "
         #                 "полученные сонологом. "
         #                 "Ты обязан опираться строго на них при анализе сна и формулировке ответа.\n\n"
-        #                 f"<RAG_CONTEXT>\n{rag_answer}\n</RAG_CONTEXT>\n"
+        #                 f"<KNOWLEDGE_BASE>\n{rag_answer}\n</KNOWLEDGE_BASE>\n"
         #                 "Используй его как главный источник истины при рассуждениях."
         #             ),
         #         },
@@ -243,7 +243,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
         #                 "Ниже приведёна 'База знаний Sleeptery'— аналитические материалы и объяснения, "
         #                 "полученные сонологом. "
         #                 "Ты обязан опираться на них при анализе сна и формулировке ответа.\n\n"
-        #                 f"<RAG_CONTEXT>\n{rag_answer}\n</RAG_CONTEXT>\n"
+        #                 f"<KNOWLEDGE_BASE>\n{rag_answer}\n</KNOWLEDGE_BASE>\n"
         #                 "Используй его как главный источник истины при рассуждениях."
         #             ),
         #         },

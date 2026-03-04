@@ -17,8 +17,6 @@ from app.include.logging_config import logger as log
 from flashrank import Ranker
 
 
-client = QdrantClient(host="qdrant", port=6333)
-
 embeddings = QwenEmbedding(
     model=config.EMBEDDING_MODEL_ID,
     dimensions=config.VECTOR_DIMENSION
@@ -27,7 +25,7 @@ def get_vector_store(is_test):
     if is_test:
         test_collection_name = f"{config.COLLECTION_NAME_DIALOG_AI}"
         return QdrantVectorStore(
-            client=QdrantClient(host="82.22.184.82", port=6445),
+            client=QdrantClient(host="82.22.184.82", port=6333),
             collection_name=test_collection_name,
             embedding=embeddings,
             retrieval_mode="dense",
@@ -36,7 +34,7 @@ def get_vector_store(is_test):
         )
     else:
         return QdrantVectorStore(
-            client=client,
+            client=QdrantClient(host="qdrant", port=6333),
             collection_name=config.COLLECTION_NAME_DIALOG_AI,
             embedding=embeddings,
             retrieval_mode="dense",
@@ -61,7 +59,7 @@ async def retriever_context(is_test: bool = False):
         # Базовый ретривер
         base_retriever = vector_store.as_retriever(
             search_type="mmr",
-            search_kwargs={"k": 20, "fetch_k": 45, "lambda_mult": 0.7}
+            search_kwargs={"k": 25, "fetch_k": 45, "lambda_mult": 0.7}
         )
 
         # base_retriever = vector_store.as_retriever(
@@ -73,9 +71,10 @@ async def retriever_context(is_test: bool = False):
 
         reranker = FlashrankRerank(
             client=flashrank_client,
-            model=config.FLASH_RANK_MODEL, 
-            top_n=10
+            model="ms-marco-MiniLM-L12-v2", 
+            top_n=20
         )
+        log.info(f"\n-------- {reranker=}\n")
 
         pipeline_compressor = DocumentCompressorPipeline(
             transformers=[reranker]

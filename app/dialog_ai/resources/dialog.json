@@ -11,7 +11,7 @@
       "description": "Пользовательские привычки, добавленные вручную (если есть)."
     },
     "sleep_rate": {
-      "amount": null,
+      "amount": 5,
       "type": "integer",
       "description": "Оценка сна по шкале от 1 до 5, выставленная пользователем."
     },
@@ -26,12 +26,12 @@
       "description": "Флаг, указывающий, чувствовал ли себя пользователь счастливым в течение дня."
     },
     "date": {
-      "amount": "2025-11-14",
+      "amount": "2026-02-27",
       "type": "string",
       "description": "Дата записи дневника (в формате YYYY-MM-DD)."
     },
     "duration_qualitative_sleep_seconds": {
-      "amount": 13534,
+      "amount": 14006,
       "type": "integer",
       "description": "Продолжительность качественного сна за этот день (в секундах), если фиксировалась."
     },
@@ -43,12 +43,12 @@
   },
   "sleep daily stats": {
     "start_time": {
-      "amount": "02:14:08",
+      "amount": "02:22:18",
       "type": "string",
       "description": "Время отхода ко сну."
     },
     "end_time": {
-      "amount": "12:00:00",
+      "amount": "11:00:19",
       "type": "string",
       "description": "Время пробуждения."
     },
@@ -68,12 +68,12 @@
       "description": "Оценка глубокого сна за ночь"
     },
     "rem_sleep_rating": {
-      "amount": "так себе",
+      "amount": "хорошо",
       "type": "string",
       "description": "Оценка REM-сна за ночь"
     },
     "duration_asleep_state_seconds": {
-      "amount": 35129,
+      "amount": 31046,
       "type": "integer",
       "description": "Общая продолжительность сна в секундах."
     },
@@ -83,22 +83,22 @@
       "description": "Время бодрствования в секундах."
     },
     "duration_light_sleep_state_seconds": {
-      "amount": 21595,
+      "amount": 17040,
       "type": "integer",
       "description": "Лёгкий сон в секундах."
     },
     "duration_qualitative_sleep_seconds": {
-      "amount": 13534,
+      "amount": 14006,
       "type": "integer",
       "description": "Качественный сон в секундах."
     },
     "duration_rem_sleep_state_seconds": {
-      "amount": 6140,
+      "amount": 6324,
       "type": "integer",
       "description": "REM-сон в секундах."
     },
     "duration_deep_sleep_state_seconds": {
-      "amount": 7394,
+      "amount": 7682,
       "type": "integer",
       "description": "Глубокий сон в секундах."
     },
@@ -123,25 +123,25 @@
       "description": "Время пробуждения (локальное время, формат HH:MI:SS)."
     },
     "bedtime_deviation_seconds": {
-      "amount": 7448,
+      "amount": 7938,
       "type": "integer",
       "description": "Отклонение отхода ко сну от нормы."
     },
     "wakeup_deviation_seconds": {
-      "amount": 13800,
+      "amount": 10219,
       "type": "integer",
       "description": "Отклонение пробуждения от нормы."
     }
   },
   "sleep weekly stats": {
-    "13.11.2025": {
+    "24.02.2026": {
       "start_time": {
-        "amount": "02:24:07",
+        "amount": "02:27:36",
         "type": "string",
         "description": "Время отхода ко сну."
       },
       "end_time": {
-        "amount": "12:00:01",
+        "amount": "09:19:44",
         "type": "string",
         "description": "Время пробуждения."
       },
@@ -150,7 +150,7 @@
       "deep_sleep_rating": null,
       "rem_sleep_rating": null,
       "duration_asleep_state_seconds": {
-        "amount": 34518,
+        "amount": 24702,
         "type": "integer",
         "description": "Общая продолжительность сна в секундах."
       },
@@ -160,22 +160,22 @@
         "description": "Время бодрствования в секундах."
       },
       "duration_light_sleep_state_seconds": {
-        "amount": 19692,
+        "amount": 14041,
         "type": "integer",
         "description": "Лёгкий сон в секундах."
       },
       "duration_qualitative_sleep_seconds": {
-        "amount": 14826,
+        "amount": 10661,
         "type": "integer",
         "description": "Качественный сон в секундах."
       },
       "duration_rem_sleep_state_seconds": {
-        "amount": 5565,
+        "amount": 3635,
         "type": "integer",
         "description": "REM-сон в секундах."
       },
       "duration_deep_sleep_state_seconds": {
-        "amount": 9261,
+        "amount": 7026,
         "type": "integer",
         "description": "Глубокий сон в секундах."
       },
@@ -200,24 +200,24 @@
         "description": "Планируемое Время пробуждения."
       },
       "bedtime_deviation_seconds": {
-        "amount": 8047,
+        "amount": 8256,
         "type": "integer",
         "description": "Отклонение отхода ко сну от нормы."
       },
       "wakeup_deviation_seconds": {
-        "amount": 13801,
+        "amount": 4184,
         "type": "integer",
         "description": "Отклонение пробуждения от нормы."
       }
     },
-    "14.11.2025": {
+    "25.02.2026": {
       "start_time": {
-        "amount": "02:14:08",
+        "amount": "02:29:06",
         "type": "string",
         "description": "Время отхода ко сну."
       },
       "end_time": {
-        "amount": "12:00:00",
+        "amount": "12:20:10",
         "type": "string",
         "description": "Время пробуждения."
       },
@@ -226,7 +226,7 @@
       "deep_sleep_rating": null,
       "rem_sleep_rating": null,
       "duration_asleep_state_seconds": {
-        "amount": 35129,
+        "amount": 35437,
         "type": "integer",
         "description": "Общая продолжительность сна в секундах."
       },
@@ -236,22 +236,22 @@
         "description": "Время бодрствования в секундах."
       },
       "duration_light_sleep_state_seconds": {
-        "amount": 21595,
+        "amount": 23846,
         "type": "integer",
         "description": "Лёгкий сон в секундах."
       },
       "duration_qualitative_sleep_seconds": {
-        "amount": 13534,
+        "amount": 11591,
         "type": "integer",
         "description": "Качественный сон в секундах."
       },
       "duration_rem_sleep_state_seconds": {
-        "amount": 6140,
+        "amount": 5151,
         "type": "integer",
         "description": "REM-сон в секундах."
       },
       "duration_deep_sleep_state_seconds": {
-        "amount": 7394,
+        "amount": 6440,
         "type": "integer",
         "description": "Глубокий сон в секундах."
       },
@@ -276,24 +276,24 @@
         "description": "Планируемое Время пробуждения."
       },
       "bedtime_deviation_seconds": {
-        "amount": 7448,
+        "amount": 8346,
         "type": "integer",
         "description": "Отклонение отхода ко сну от нормы."
       },
       "wakeup_deviation_seconds": {
-        "amount": 13800,
+        "amount": 15010,
         "type": "integer",
         "description": "Отклонение пробуждения от нормы."
       }
     },
-    "15.11.2025": {
+    "27.02.2026": {
       "start_time": {
-        "amount": "02:52:55",
+        "amount": "02:22:18",
         "type": "string",
         "description": "Время отхода ко сну."
       },
       "end_time": {
-        "amount": "11:08:10",
+        "amount": "11:00:19",
         "type": "string",
         "description": "Время пробуждения."
       },
@@ -302,7 +302,7 @@
       "deep_sleep_rating": null,
       "rem_sleep_rating": null,
       "duration_asleep_state_seconds": {
-        "amount": 29687,
+        "amount": 31046,
         "type": "integer",
         "description": "Общая продолжительность сна в секундах."
       },
@@ -312,22 +312,22 @@
         "description": "Время бодрствования в секундах."
       },
       "duration_light_sleep_state_seconds": {
-        "amount": 17541,
+        "amount": 17040,
         "type": "integer",
         "description": "Лёгкий сон в секундах."
       },
       "duration_qualitative_sleep_seconds": {
-        "amount": 12146,
+        "amount": 14006,
         "type": "integer",
         "description": "Качественный сон в секундах."
       },
       "duration_rem_sleep_state_seconds": {
-        "amount": 4389,
+        "amount": 6324,
         "type": "integer",
         "description": "REM-сон в секундах."
       },
       "duration_deep_sleep_state_seconds": {
-        "amount": 7757,
+        "amount": 7682,
         "type": "integer",
         "description": "Глубокий сон в секундах."
       },
@@ -352,12 +352,12 @@
         "description": "Планируемое Время пробуждения."
       },
       "bedtime_deviation_seconds": {
-        "amount": 9775,
+        "amount": 7938,
         "type": "integer",
         "description": "Отклонение отхода ко сну от нормы."
       },
       "wakeup_deviation_seconds": {
-        "amount": 10690,
+        "amount": 10219,
         "type": "integer",
         "description": "Отклонение пробуждения от нормы."
       }
@@ -367,17 +367,17 @@
   "history sleep assessment": [
     {
       "sleep_date": {
-        "amount": "2025-11-14",
+        "amount": "2026-02-27",
         "type": "string",
         "description": "Дата сна"
       },
       "sleep_assessment": {
-        "amount": "Ночь была почти без пробуждений — это суперсила! Но ты снова лег на 2 часа позже цели, и режим уплывает от идеала.",
+        "amount": "Восстановление набирает обороты — глубокие фазы и REM показывают стабильный рост три ночи подряд. Но подъём всё ещё плавает на 2–3 часа, и внутренние часы не могут зацепиться за якорь.",
         "type": "string",
         "description": "Оценка сна"
       },
       "recommendation": {
-        "amount": "Твоя команда Sleeptery видит, что прошлые советы по вечернему ритуалу не сработали — режим всё ещё скачет. Давай попробуем «миссию якорения»: сегодня вечером за 15 минут до цели в 00:10 просто ляг и представь, как твой внутренний будильник закрепляется на нужной волне. Это поможет телу войти в ритм без стресса. 💤 И не забудь заполнить дневник — он наш ключ к твоим привычкам.",
+        "amount": "Исследования показывают: когда утро стабильно, организм заранее готовит мелатонин к вечеру. Выбери одно время подъёма и держи его 10–14 дней — даже после поздней ночи. Вечернее засыпание начнёт подтягиваться автоматически, как только тело поймёт новый ритм. Это работает для 93% людей — большинство из нас «голуби», а не совы. Запиши в дневник этот утренний ритуал с фиксированным подъёмом — так Sleeptery сможет отслеживать, как стабильное утро влияет на твоё вечернее засыпание.",
         "type": "string",
         "description": "Совет по сну"
       },
@@ -389,39 +389,39 @@
     },
     {
       "sleep_date": {
-        "amount": "2025-11-13",
+        "amount": "2026-02-25",
         "type": "string",
         "description": "Дата сна"
       },
       "sleep_assessment": {
-        "amount": "Ночь была почти без пробуждений — это суперсила! Но ты снова лег на 2 часа позже цели, и режим уплывает от идеала.",
+        "amount": "Тело наконец выспалось вдоволь — REM-фаза вернулась к норме, глубокое восстановление держится стабильно. Но график всё ещё плавает: подъём сдвинулся на 4 часа позже плана, и внутренние часы теряют ориентир.",
         "type": "string",
         "description": "Оценка сна"
       },
       "recommendation": {
-        "amount": "Твоя команда Sleeptery видит, что прошлые советы по якорению и цифровому закату не сработали — режим всё ещё скачет. Давай попробуем «миссию вечернего ритуала»: сегодня вечером за 15 минут до цели в 00:10 сделай что-то простое и расслабляющее, например, почитай бумажную книгу или послушай спокойную музыку. Это поможет твоему мозгу настроиться на сон без давления. 💤 И не забудь заполнить дневник — он наш ключ к твоим привычкам.",
+        "amount": "Sleeptery знает: когда время подъёма меняется, организм не понимает, когда запускать гормон бодрости. Начни с «точки опоры» — фиксируй подъём на 08:10 даже после поздней ночи. Первые дни будут непростыми, но через 10–14 дней вечернее засыпание начнёт подтягиваться само, ведь тело поймёт ритм. Запиши в дневник этот утренний ритуал с фиксированным подъёмом — так Sleeptery сможет отслеживать, как стабильное время пробуждения влияет на твоё засыпание вечером.",
         "type": "string",
         "description": "Совет по сну"
       },
       "reaction": {
-        "amount": null,
+        "amount": 1,
         "type": "string",
         "description": "Реакция пользователя на совет. (True - нравиться, False - Не нравится, None - не отметил)"
       }
     },
     {
       "sleep_date": {
-        "amount": "2025-11-12",
+        "amount": "2026-02-24",
         "type": "string",
         "description": "Дата сна"
       },
       "sleep_assessment": {
-        "amount": "Ночь была почти без пробуждений — это суперсила! Но ты снова лег на 1,5 часа позже цели, и режим уплывает от идеала.",
+        "amount": "Внутренние часы всё ещё ищут свой ритм — REM-фаза уменьшилась, хотя глубокое восстановление осталось стабильным. Позднее засыпание после 2 ночи не даёт телу поймать вечерний пик мелатонина.",
         "type": "string",
         "description": "Оценка сна"
       },
       "recommendation": {
-        "amount": "Твоя команда Sleeptery видит, что прошлые советы по цифровому закату и тихой гавани не сработали — режим всё ещё скачет. Давай попробуем «миссию якорения»: сегодня вечером за 15 минут до цели в 00:10 просто ляг и представь, как твой внутренний будильник закрепляется на нужной волне. Это поможет телу войти в ритм без стресса. 💤 И не забудь заполнить дневник — он наш ключ к твоим привычкам.",
+        "amount": "Sleeptery знает: когда подъём плавает, организм не понимает, когда запускать кортизол — гормон бодрости. Утренний свет в первые 30 минут после пробуждения помогает внутренним часам синхронизироваться с днём. Поставь будильник на 08:10 и сразу открой шторы или включи яркий свет. Через 10–14 дней вечернее засыпание начнёт подтягиваться само. Запиши в дневник этот утренний ритуал со светом — так Sleeptery сможет отслеживать, как яркий свет после пробуждения влияет на твоё засыпание вечером.",
         "type": "string",
         "description": "Совет по сну"
       },
