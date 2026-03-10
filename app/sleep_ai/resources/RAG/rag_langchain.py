@@ -26,9 +26,9 @@ embeddings = QwenEmbedding(
 )
 def get_vector_store(is_test):
     if is_test:
-        test_collection_name = f"{config.COLLECTION_NAME_SLEEP_AI}_test"
+        test_collection_name = f"{config.COLLECTION_NAME_SLEEP_AI}"
         return QdrantVectorStore(
-            client=QdrantClient(host="localhost", port=6445),
+            client=QdrantClient(host="82.22.184.82", port=6333),
             collection_name=test_collection_name,
             embedding=embeddings,
             retrieval_mode="dense",

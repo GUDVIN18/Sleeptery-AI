@@ -1,10 +1,4 @@
 from langgraph.graph import StateGraph, START, END
-from .schemas.dialog import (
-    ResponseFormatAi, 
-    UploadDialogAi, 
-    ResponseDialogAi,
-    DialogAi
-)
 from pathlib import Path
 import asyncio
 import json
@@ -21,7 +15,8 @@ from .RAG.rag_langchain import retriever_context
 from .schemas.dialog import (
     ResponseFormatAi, 
     UploadDialogAi, 
-    ResponseDialogAi
+    ResponseDialogAi,
+    DialogAi
 )
 from .exceptions import (
     DialogAiErrorConnect,
@@ -61,7 +56,7 @@ async def geration_pipe(
         top_p=0.95,
         extra_body={
             "enable_thinking": True,
-            "thinking_budget": 120,
+            "thinking_budget": 70,
         },
     )
     main_llm=ChatQwQ(
@@ -87,7 +82,7 @@ async def geration_pipe(
             sleep_date=data.sleep_date
         )
         state.history_messages = current_history
-        log.debug(f"{state.user_id}: История подгружена")
+        log.debug(f"{state.user_id}: История подгружена. Всего {len(current_history)} сообщений.")
         return state
     
     async def llm_helper(state: DialogAi) -> DialogAi:
@@ -103,7 +98,7 @@ async def geration_pipe(
             "input": state.message
         })
         state.context_rag_search = result.content
-        log.info(f"[{data.user_id}] Rewritten query: {result.content}")
+        log.info(f"{data.user_id}: Проблема для поиска в бд: {result.content}")
         return state
 
     async def search_vector_db(state: DialogAi) -> DialogAi:
@@ -111,6 +106,7 @@ async def geration_pipe(
         docs = await retriever.ainvoke(state.context_rag_search)
         context_text = "\n\n".join([doc.page_content for doc in docs])
         state.context_vector_db = context_text
+        log.debug(f"{state.user_id}: Найдено {len(docs)} документов")
         return state
     
     async def llm_response(state: DialogAi) -> DialogAi:
@@ -120,20 +116,12 @@ async def geration_pipe(
         else:
             sleep_data_str="Не предоставлены"
 
-        # messages = [
-        #     SystemMessage(content=f"Данные сна (ПЕРЕВЕДИ В ЧАСЫ): {sleep_data_str}"),
-        #     SystemMessage(content=f"Рекомендация по улучшению сна: {state.sleep_assessment or 'Не предоставлен'}"),
-        #     SystemMessage(content=f"Контекст из базы знаний для ответа на вопрос: {state.context_vector_db}"),
-        #     *state.history_messages,
-        #     HumanMessage(content=state.message)
-        # ]
-
         prompt_template = PromptTemplate(
             template="""
         {system_instructions}
 
         Данные сна пользователя:
-        {sleep_data}
+        {sleep_json}
 
         Рекомендация по улучшению сна:
         {sleep_assessment}
@@ -149,10 +137,11 @@ async def geration_pipe(
 
         {format_instructions}
 
-        Верни ТОЛЬКО JSON без дополнительных комментариев!
+        Верни ТОЛЬКО JSON без дополнительных комментариев! 
+        не допускай использование английскийх слов в ответе
         """,
             input_variables=[
-                "sleep_data",
+                "sleep_json",
                 "sleep_assessment",
                 "context",
                 "history",
@@ -167,13 +156,13 @@ async def geration_pipe(
         chain = prompt_template | main_llm | parser
 
         response = await chain.ainvoke({
-            "sleep_data": sleep_data_str,
+            "sleep_json": sleep_data_str,
             "sleep_assessment": state.sleep_assessment or "Не предоставлен",
             "context": state.context_vector_db,
             "history": state.history_messages,
             "question": state.message
         })
-        log.debug(f"{response=}")
+        log.debug(f"{state.user_id}: {response=}")
         state.answer = response['answer']
         state.button = response['button']
         return state
