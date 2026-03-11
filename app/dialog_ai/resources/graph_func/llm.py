@@ -29,7 +29,7 @@ llm_analytics = ChatQwQ(
     top_p=0.95,
     extra_body={
         "enable_thinking": True,
-        "thinking_budget": 70,
+        "thinking_budget": 40,
     },
     callbacks=[langfuse_handler],
 )
@@ -40,7 +40,7 @@ main_llm=ChatQwQ(
     top_p=0.95,
     extra_body={
         "enable_thinking": True,
-        "thinking_budget": 350,
+        "thinking_budget": 110,
     },
     callbacks=[langfuse_handler],
 )

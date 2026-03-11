@@ -44,7 +44,10 @@ def get_vector_store(is_test):
 
 
 try:
-    flashrank_client = Ranker(model_name="ms-marco-TinyBERT-L-2-v2", cache_dir="/tmp/flashrank_cache")
+    flashrank_client = Ranker(
+        model_name=config.FLASH_RANK_MODEL,
+        cache_dir="/tmp/flashrank_cache"
+    )
 except Exception as e:
     log.error(f"Failed to load Ranker: {e}")
     flashrank_client = None
@@ -59,7 +62,7 @@ async def retriever_context(is_test: bool = False):
         # Базовый ретривер
         base_retriever = vector_store.as_retriever(
             search_type="mmr",
-            search_kwargs={"k": 25, "fetch_k": 45, "lambda_mult": 0.7}
+            search_kwargs={"k": 15, "fetch_k": 20, "lambda_mult": 0.7}
         )
 
         # base_retriever = vector_store.as_retriever(
@@ -71,8 +74,8 @@ async def retriever_context(is_test: bool = False):
 
         reranker = FlashrankRerank(
             client=flashrank_client,
-            model="ms-marco-MiniLM-L12-v2", 
-            top_n=20
+            model=config.FLASH_RANK_MODEL, 
+            top_n=12
         )
         log.info(f"\n-------- {reranker=}\n")
 

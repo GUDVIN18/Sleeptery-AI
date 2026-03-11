@@ -13,15 +13,15 @@ from ..RAG.rag_langchain import retrieve_context
 async def init_models(state: SleepGraphAi) -> SleepGraphAi:
     """Узле для сборки модели SleepGraphAi"""
     log.info(f"Начали собирать данные")
-    user_diary_records = extract_full_block(state.sleep_data["user diary records"])
-    sleep_daily_stats = extract_full_block(state.sleep_data["sleep daily stats"])
+    user_diary_records = extract_full_block(state.sleep_data["user_diary_records"])
+    sleep_daily_stats = extract_full_block(state.sleep_data["sleep_daily_stats"])
     sleep_weekly_stats = {
         date: extract_full_block(day)
-        for date, day in state.sleep_data["sleep daily stats"].items()
+        for date, day in state.sleep_data["sleep_daily_stats"].items()
     }
     history_sleep_assessment = [
         extract_full_block(day)
-        for day in state.sleep_data["history sleep assessment"]
+        for day in state.sleep_data["history_sleep_assessment"]
     ]
 
     state.user_diary_records=user_diary_records
@@ -118,7 +118,7 @@ Cон за сегодня:
 
     chain = prompt | classifier_llm | classifier_parser
 
-    habits = extract_habits(state.sleep_data["user diary records"])
+    habits = extract_habits(state.sleep_data["user_diary_records"])
     default_habits = habits["default_habits"]
     custom_habits = habits["custom_habits"]
     log.debug(f"{default_habits=}|{custom_habits=}")

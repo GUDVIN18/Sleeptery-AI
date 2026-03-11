@@ -46,6 +46,7 @@ class ResponseSleepAi(BaseModel):
         description="Совет"
     )
     mission: str = Field(
+        None,
         description="Миссия"
     )
     button: Optional[str] = Field(

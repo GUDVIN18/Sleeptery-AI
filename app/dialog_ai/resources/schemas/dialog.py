@@ -25,7 +25,7 @@ class ResponseFormatAi(BaseModel):
 # для fastapi роутера
 class ResponseDialogAi(BaseModel):
     answer: str = Field(description="Ответ AI")
-    button: Optional[Buttons] = Field(
+    button: Optional[str] = Field(
         default=None,
         description='''Если в своем ответе ты используешь совет по улучшению сна(ритуал/совет) то выведи кнопку "Добавить совет в дневник". Если в ответе нет вышесказанного - ничего не доабвляй'''
     )
