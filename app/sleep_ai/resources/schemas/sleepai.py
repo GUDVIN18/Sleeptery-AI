@@ -48,6 +48,10 @@ class ResponseSleepAi(BaseModel):
     mission: str = Field(
         description="Миссия"
     )
+    button: Optional[str] = Field(
+        None,
+        description="Кнопка с добавлением совета"
+    )
 
 
 class UploadSleepAi(BaseModel):

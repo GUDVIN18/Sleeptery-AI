@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     BATCH_SIZE: int = Field(..., env="BATCH_SIZE")
     FLASH_RANK_MODEL: str = Field(..., env="FLASH_RANK_MODEL")
 
+    LANGFUSE_SECRET_KEY: str = Field(..., env="LANGFUSE_SECRET_KEY")
+    LANGFUSE_PUBLIC_KEY: str = Field(..., env="LANGFUSE_PUBLIC_KEY")
+    LANGFUSE_BASE_URL: str = Field(..., env="LANGFUSE_BASE_URL")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

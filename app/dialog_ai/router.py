@@ -7,7 +7,8 @@ from .resources.schemas.dialog import (
     ResponseDialogAi, 
     UploadDialogAi, 
     ResponseFormatAi, 
-    ResponseMessage
+    ResponseMessage,
+    DialogAi
 )
 from .resources.pipline import geration_pipe
 from .resources.redis_client import RedisClient
@@ -30,8 +31,11 @@ async def dialog(
 ):
     log.info(f"{data=}")
     try:
-        dialogai_answer: ResponseDialogAi = await geration_pipe(data=data)
-        return dialogai_answer
+        dialogai_answer: DialogAi = await geration_pipe(data=data)
+        return ResponseDialogAi(
+            answer=dialogai_answer.answer,
+            button=dialogai_answer.button
+        )
     except Exception as e:
         log.error(f"Unhandled error in /chat endpoint: {e}")
         raise DialogAiErrorGeneration

@@ -52,6 +52,7 @@ class UploadDialogAi(BaseModel):
 
 
 class DialogAi(UploadDialogAi):
+    test_mode: bool = Field(False)
     context_vector_db: str = Field(
         None,
         description="Контекст из векторноый базы знаний"

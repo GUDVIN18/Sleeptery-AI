@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from app.include.config import config
 from langchain_qwq import ChatQwQ
@@ -7,6 +8,7 @@ from app.include.logging_config import logger as log
 from app.sleep_ai.resources.schemas.sleepai import (
     ResponseFormat,
 )
+from langfuse.langchain import CallbackHandler
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -18,6 +20,13 @@ except FileNotFoundError as e:
     log.error(f"Failed to load prompt templates: {e}")
     raise
 
+os.environ["LANGFUSE_PUBLIC_KEY"] = config.LANGFUSE_PUBLIC_KEY
+os.environ["LANGFUSE_SECRET_KEY"] = config.LANGFUSE_SECRET_KEY
+os.environ["LANGFUSE_HOST"] = config.LANGFUSE_BASE_URL
+
+
+langfuse_handler = CallbackHandler()
+
 agent_helper=create_agent(
     model=ChatQwQ(
         api_key=config.QWEN_API_KEY,
@@ -28,6 +37,7 @@ agent_helper=create_agent(
             "enable_thinking": True,
             "thinking_budget": 100,
         },
+        callbacks=[langfuse_handler],
     ),
     system_prompt=HELP_MODEL_INSTRUCTION,
     response_format=ResponseFormat
@@ -43,6 +53,7 @@ main_llm=ChatQwQ(
         "enable_thinking": True,
         "thinking_budget": 350,
     },
+    callbacks=[langfuse_handler],
 )
 
 classifier_llm = ChatQwQ(
@@ -52,5 +63,6 @@ classifier_llm = ChatQwQ(
     extra_body={
         "enable_thinking": True,
         "thinking_budget": 30,
-    }
+    },
+    callbacks=[langfuse_handler],
 )
