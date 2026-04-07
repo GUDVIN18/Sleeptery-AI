@@ -1,4 +1,5 @@
 import json
+import time
 import asyncio
 from langgraph.graph import StateGraph, START, END
 from .redis_client import RedisClient
@@ -15,7 +16,8 @@ from .graph_func.graph import (
     _current_history,
     llm_helper,
     search_vector_db,
-    llm_response
+    llm_response,
+    _build_button
 )
 
 
@@ -25,6 +27,7 @@ async def geration_pipe(
 ) -> DialogAi:
     if not config.QWEN_API_KEY:
         raise DialogAiErrorConnect("API key is not set.")
+    start_time = time.time()
     graph = StateGraph(DialogAi)
 
     # добавляем node (узлы = наши функции)
@@ -32,6 +35,7 @@ async def geration_pipe(
     graph.add_node("llm_helper", llm_helper)
     graph.add_node("search_vector_db", search_vector_db)
     graph.add_node("llm_response", llm_response)
+    # graph.add_node("_build_button", _build_button)
 
 
     # Теперь выстраиваем ребра (последоваельность)
@@ -39,26 +43,32 @@ async def geration_pipe(
     graph.add_edge("_current_history", "llm_helper")
     graph.add_edge("llm_helper", "search_vector_db")
     graph.add_edge("search_vector_db", "llm_response")
+    # graph.add_edge("llm_response", "_build_button")
     graph.add_edge("llm_response", END)
     app = graph.compile()
 
     initial_state = DialogAi(**data.model_dump(), test_mode=is_test)
 
     result = await app.ainvoke(initial_state)
-
-    RedisClient(
-        session_id=f"{data.user_id}_{data.sleep_date}"
-    ).add_message(
-        role="user",
-        message=result['message']
-    )
-    RedisClient(
-        session_id=f"{data.user_id}_{data.sleep_date}"
-    ).add_message(
-        role="ai",
-        message=result['answer']
-    )
-    return DialogAi(**result)
+    if result:
+        try:
+            RedisClient(
+                session_id=f"{data.user_id}_{data.sleep_date}"
+            ).add_message(
+                role="user",
+                message=result['message']
+            )
+            RedisClient(
+                session_id=f"{data.user_id}_{data.sleep_date}"
+            ).add_message(
+                role="ai",
+                message=result['answer']
+            )
+        except Exception as e:
+            log.error(f"Ошибка в DialogAI при добавлении истории: {e}")
+        end_time = time.time()
+        log.success(f"Pipeline execution time: {end_time - start_time:.2f} seconds")
+        return DialogAi(**result)
 
 
 
@@ -71,8 +81,8 @@ if __name__ == "__main__":
     response_ass="RAG-наука подтверждает: утренний свет — самый мощный якорь для внутренних часов. Яркий свет в первые 30 минут после пробуждения запускает кортизол и помогает телу понять — день начался. Попробуй миссию «Световой якорь»: сразу после подъёма открой шторы или включи яркий свет на 5–10 минут. Это сигнал для мозга: пора просыпаться, и вечером мелатонин придёт вовремя. Внеси утренний световой ритуал в дневник — так Sleeptery сможет отслеживать, как яркий свет после пробуждения влияет на твоё вечернее засыпание и стабильность графика.",
     asyncio.run(geration_pipe(
         data=UploadDialogAi(
-            user_id=58055, 
-            message="Хочу новый совет", 
+            user_id=58056, 
+            message="привет", 
             sleep_json=sleep_json,
             sleep_assessment=f"{sleep_assessment}\n{response_ass}",
             sleep_date="2026-02-27"),

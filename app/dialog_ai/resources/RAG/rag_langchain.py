@@ -1,4 +1,5 @@
 import os
+import torch
 import asyncio
 from langchain_qdrant import QdrantVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -10,10 +11,11 @@ import dashscope
 from qdrant_client.models import Distance, VectorParams
 from app.include.embeddings.qwen_embedding import QwenEmbedding
 from langchain_classic.retrievers import ContextualCompressionRetriever
-from langchain_classic.retrievers.document_compressors import DocumentCompressorPipeline
+from langchain_classic.retrievers.document_compressors import DocumentCompressorPipeline, CrossEncoderReranker
 from langchain_community.document_compressors import FlashrankRerank
 from langchain_community.document_transformers import LongContextReorder
 from app.include.logging_config import logger as log
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from flashrank import Ranker
 
 
@@ -21,6 +23,19 @@ embeddings = QwenEmbedding(
     model=config.EMBEDDING_MODEL_ID,
     dimensions=config.VECTOR_DIMENSION
 )
+
+try:
+    _cross_encoder = HuggingFaceCrossEncoder(
+        model_name="DiTy/cross-encoder-russian-msmarco",
+        model_kwargs={"trust_remote_code": True},
+    )
+    reranker = CrossEncoderReranker(model=_cross_encoder, top_n=12)
+    log.info("GTE multilingual reranker loaded successfully")
+except Exception as e:
+    log.error(f"Failed to load reranker: {e}")
+    reranker = None
+
+
 def get_vector_store(is_test):
     if is_test:
         test_collection_name = f"{config.COLLECTION_NAME_DIALOG_AI}"
@@ -43,48 +58,23 @@ def get_vector_store(is_test):
         )
 
 
-try:
-    flashrank_client = Ranker(
-        model_name=config.FLASH_RANK_MODEL,
-        cache_dir="/tmp/flashrank_cache"
-    )
-except Exception as e:
-    log.error(f"Failed to load Ranker: {e}")
-    flashrank_client = None
-
-async def retriever_context(is_test: bool = False):
+async def retriever_context(is_test: bool = False) -> ContextualCompressionRetriever:
     vector_store = get_vector_store(is_test)
 
     try:
-        if flashrank_client is None:
-            raise ValueError("Flashrank client is not initialized")
-
         # Базовый ретривер
         base_retriever = vector_store.as_retriever(
             search_type="mmr",
             search_kwargs={"k": 15, "fetch_k": 20, "lambda_mult": 0.7}
         )
 
-        # base_retriever = vector_store.as_retriever(
-        #     search_type="similarity",
-        #     search_kwargs={
-        #         "k": 25,  # Берем больше документов для анализа (было 10)
-        #     }
-        # )
+        if reranker is None:
+            log.warning("Reranker unavailable, fallback to MMR k=5")
+            return vector_store.as_retriever(search_type="mmr", search_kwargs={"k": 5})
 
-        reranker = FlashrankRerank(
-            client=flashrank_client,
-            model=config.FLASH_RANK_MODEL, 
-            top_n=12
-        )
-        log.info(f"\n-------- {reranker=}\n")
-
-        pipeline_compressor = DocumentCompressorPipeline(
-            transformers=[reranker]
-        )
-
+        pipeline_compressor = DocumentCompressorPipeline(transformers=[reranker])
         return ContextualCompressionRetriever(
-            base_compressor=pipeline_compressor, 
+            base_compressor=pipeline_compressor,
             base_retriever=base_retriever
         )
 

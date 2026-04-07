@@ -52,21 +52,21 @@ def extract_full_block(block: dict) -> dict:
         }
     return result
 
-async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
+async def geration_pipe(sleep_json: UploadSleepAi) -> ResponseFormatAi:
     try:
         log.info(f"Успешно зашли в geration_pipe")
         if not config.QWEN_API_KEY:
             raise SleepAiErrorConnect("API key is not set.")
 
-        user_diary_records = extract_full_block(sleep_data["user_diary_records"])
-        sleep_daily_stats = extract_full_block(sleep_data["sleep_daily_stats"])
+        user_diary_records = extract_full_block(sleep_json["user_diary_records"])
+        sleep_daily_stats = extract_full_block(sleep_json["sleep_daily_stats"])
         sleep_weekly_stats = {
             date: extract_full_block(day)
-            for date, day in sleep_data["sleep_weekly_stats"].items()
+            for date, day in sleep_json["sleep_weekly_stats"].items()
         }
         history_sleep_assessment = [
             extract_full_block(day)
-            for day in sleep_data["history_sleep_assessment"]
+            for day in sleep_json["history_sleep_assessment"]
         ]
 
         log.info(f"Успешно перешли к инициализации agent_helper")
@@ -106,7 +106,7 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
         helper_analytics = await agent_helper.ainvoke(
             {"messages": 
                 [
-                    {"role": "user", "content": f"Данные сна: {sleep_data}"},
+                    {"role": "user", "content": f"Данные сна: {sleep_json}"},
                 ]
             }
         )
@@ -275,6 +275,6 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> ResponseFormatAi:
 if __name__ == "__main__":
     user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep.json"
     with open(user_prompt_path, "r") as f:
-        sleep_data = f.read()
+        sleep_json = f.read()
 
-    asyncio.run(geration_pipe(sleep_data=json.loads(sleep_data)))
+    asyncio.run(geration_pipe(sleep_json=json.loads(sleep_json)))

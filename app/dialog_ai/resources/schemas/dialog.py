@@ -6,28 +6,38 @@ import datetime as dt
 from enum import Enum
 
 
-class Buttons(BaseModel):
-    type: Literal["addAdvice"]
-    message: str
+class ButtonType(str, Enum):
+    ADD_HABIT = "add_habit"
+    # SUGGEST_RITUAL = "suggest_ritual"
 
-# TODO: OLD, Для пайплайна
-@dataclass
-class ResponseFormatAi(BaseModel):
-    answer: str = Field(
-        description="Ответ AI" # Который мы возвращаем пользователю
+class Button(BaseModel):
+    type: ButtonType = Field(
+        description=(
+            "Тип кнопки: "
+            # f"'{ButtonType.ADD_TO_DIARY.value}' — добавить конкретный совет/ритуал из ответа в дневник; "
+            f"'{ButtonType.ADD_HABIT.value}' — предложить пользователю ритуал/совет для отслеживания и добавления в дневник."
+        )
     )
-    button: Optional[Buttons] = Field(
-        default=None,
-        description='''Если в своем ответе ты используешь совет по улучшению сна(ритуал/совет) то выведи кнопку "Добавить совет в дневник". Если в ответе нет вышесказанного - ничего не доабвляй'''
+    title: str = Field(
+        description=(
+            "название кнопки. "
+            # "Для 'add_to_diary': 'Добавить [название совета] в дневник'. "
+            f"Для '{ButtonType.ADD_HABIT.value}': краткое название ритуала, например 'Плотные шторы', 'Проветрить', 'Выключить свет' и т.д."
+        )
+    )
+    text: str = Field(
+        description=(
+            "Текст привычки для добавления в дневник. Без формулировок типа 'Добавить [название] в дневник', только название"
+        )
     )
 
 
 # для fastapi роутера
 class ResponseDialogAi(BaseModel):
-    answer: str = Field(description="Ответ AI")
-    button: Optional[str] = Field(
-        default=None,
-        description='''Если в своем ответе ты используешь совет по улучшению сна(ритуал/совет) то выведи кнопку "Добавить совет в дневник". Если в ответе нет вышесказанного - ничего не доабвляй'''
+    message: str = Field(description="Ответ AI")
+    buttons: Optional[List[Button]] = Field(
+        None,
+        description="Кнопки"
     )
 
 
@@ -67,17 +77,33 @@ class DialogAi(UploadDialogAi):
     )
     answer: str = Field(
         None,
-        description="Ответ пользователю"
-    )
-
-    button: Optional[Literal["Добавить совет в дневник"]] = Field(
-        default=None,
         description=(
-            'Если в ответе есть совет по улучшению сна, верни '
-            '"Добавить совет в дневник". '
-            'Если совета нет — верни null.'
+            "Ответ пользователю. "
+            "Если будут сгенерированы кнопки (buttons) — в самом конце ответа добавь строку: "
+            "'Добавь в свой дневник следующие ритуалы:'. "
+            "Если кнопок нет — эту фразу не добавляй."
         )
     )
+
+    buttons: Optional[List[Button]] = Field(
+        default=None,
+        description=f"""
+    Кнопки для UI. Генерируй ТОЛЬКО при необходимости на основе текущего answer и context_vector_db.
+
+    ПРАВИЛА:
+    1. {ButtonType.ADD_HABIT.value} (1-3 шт): конкретные действия/предметы из answer
+    - Извлекай из текста ответа, не придумывай
+    - Формат: краткое существительное/действие, 1-3 слова
+    - Пример логики: если в answer упомянуты "шторы блэкаут" и "маска" → label = "Шторы блэкаут", "Маска для сна"
+
+    ЗАПРЕЩЕНО:
+    - Копировать кнопки из примеров обучения
+    - Генерировать кнопки не связанные с текущим answer
+    - Генерировать если ответ — уточняющий вопрос
+    """)
+    # 2. add_to_diary (всегда 1 шт): общая тема текущего совета
+    # - Формат: "Добавить [тема] в дневник"
+    # - Тему бери из сути вопроса пользователя, не из примеров
 
 class ResponseMessage(BaseModel):
     type: str

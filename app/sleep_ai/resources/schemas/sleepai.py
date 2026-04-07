@@ -8,55 +8,20 @@ from enum import Enum
 class ResponseFormat:
     analysis: List[str]
 
-@dataclass
-class ResponseFormatAi(BaseModel):
-    sleep_assessment: str = Field(
-        description="10-20 токенов. Анализ качества ночи (динамика восстановления и пробуждений). Без сухих цифр."
-    )
-    response: str = Field(
-        description="60-80 токенов. Основной совет. Структура: 'Инсайт из <KNOWLEDGE_BASE> (почему это так)' -> 'Рекомендация (что сделать) из <KNOWLEDGE_BASE>'. Подробная логика описана в system"
-    )
-    diary_recommendation: str = Field(
-        description=(
-            "СТРОГАЯ ЛОГИКА ФОРМИРОВАНИЯ: "
-            "1) Если дневник пуст: "
-            "1.1) при отсутствии действия / миссии / ритуала в 'response' — в конце добавить короткое напоминание: "
-            "Заполни дневник сна — это поможет команде Sleeptery точнее подобрать советы. "
-            "1.2) при наличии ритуала — мягко предложить внести ЭТОТ ритуал в дневник, "
-            "указав, что так Sleeptery сможет проще отслеживать прогресс."
-        )
-    )
-    mission: str = Field(
-        description="Если в поле 'response' ты предложил конкретное действие/миссию — запиши в это поле только ее название! Иначе оставь пустым."
-    )
-
-    button: Optional[str] = Field(
-        default=None,
-        description=(
-            """Кнопка"""
-        )
-    )
-    
-
+# для fastapi роутера
 class ResponseSleepAi(BaseModel):
-    sleep_assessment: str = Field(
-        description="Анализ"
-    )
-    response: str = Field(
-        description="Совет"
-    )
-    mission: str = Field(
+    sleep_assessment: str = Field(description="Анализ")
+    response: str = Field(description="Совет")
+
+    mission: Optional[str] = Field(
         None,
         description="Миссия"
     )
-    button: Optional[str] = Field(
+
+    buttons: Optional[str] = Field(
         None,
         description="Кнопка с добавлением совета"
     )
-
-
-class UploadSleepAi(BaseModel):
-    sleep_json: Dict[str, Any]
 
 class AdviceType(str, Enum):
     GENERATION_ADVICE='generation_advice'
@@ -65,8 +30,13 @@ class AdviceType(str, Enum):
 class AdviceClassifier(BaseModel):
     advice_type: AdviceType
 
-class SleepGraphAi(BaseModel):
-    sleep_data: Dict[str, Any]
+
+class UploadSleepAi(BaseModel):
+    sleep_json: Dict[str, Any] = Field(
+        description="Сон пользователя"
+    )
+
+class SleepGraphAi(UploadSleepAi):
     user_diary_records: Optional[Any] = Field(
         default=None,
         description="Дневник пользователя за сегодняшний день"
@@ -86,6 +56,7 @@ class SleepGraphAi(BaseModel):
         default=None,
         description="История советов по улучшению сна (как раз они не должны повторяться)"
     )
+
     context_vector_db: Optional[Any] = Field(
         None,
         description="Контекст из векторноый базы знаний"
@@ -115,45 +86,11 @@ class SleepGraphAi(BaseModel):
     )
     mission: Optional[str] = Field(
         None,
-        description="Если в поле 'response' ты предложил конкретное действие/миссию — запиши в это поле только ее название! Иначе оставь пустым."
-    )
-    button: Optional[Literal["Добавить совет в дневник"]] = Field(
-        default=None,
         description=(
-            """Если поле mission заполененно, верни
-            "Добавить совет в дневник". 
-            Если mission нет — верни null."""
+            "Заполни ТОЛЬКО если в поле 'response' содержит конкретное действие-ритуал, "
+            "которое пользователь может выполнить (утренний/вечерний ритуал, упражнение, привычка и т.п.). "
+            "Запиши краткое название этого действия в 2-5 слов — точно отражающее суть из 'response'. "
+            "Если конкретного действия нет — оставь null."
         )
     )
-
-
-
-
-class AdviceLLMResponse(BaseModel):
-    sleep_assessment: str = Field(
-        description="10-20 токенов. Анализ качества ночи. Без сухих цифр."
-    )
-    response: str = Field(
-        description="60-80 токенов. Основной совет. Структура: 'Инсайт из <KNOWLEDGE_BASE> (почему это так)' -> 'Рекомендация (что сделать) из <KNOWLEDGE_BASE>'. Подробная логика описана в system"
-    )
-    diary_recommendation: str = Field(
-        description=(
-            "СТРОГАЯ ЛОГИКА ФОРМИРОВАНИЯ: "
-            "1) Если дневник пуст: "
-            "1.1) при отсутствии действия / миссии / ритуала в 'response' — в конце добавить короткое напоминание: "
-            "Заполни дневник сна — это поможет команде Sleeptery точнее подобрать советы. "
-            "1.2) при наличии ритуала — мягко предложить внести ЭТОТ ритуал в дневник, "
-            "указав, что так Sleeptery сможет проще отслеживать прогресс."
-        )
-    )
-    mission: Optional[str] = Field(
-        default=None,
-        description="Если в поле 'response' ты предложил конкретное действие/миссию — запиши в это поле только ее название! Иначе оставь пустым."
-    )
-
-    button: Optional[str] = Field(
-        default=None,
-        description=(
-            """Кнопка"""
-        )
-    )
+    buttons: Optional[List[str]] = Field(default=None)

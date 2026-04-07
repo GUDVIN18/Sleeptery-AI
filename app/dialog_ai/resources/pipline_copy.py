@@ -12,7 +12,6 @@ from langchain_core.globals import set_debug
 from .redis_client import RedisClient
 from .RAG.rag_langchain import retriever_context
 from .schemas.dialog import (
-    ResponseFormatAi, 
     UploadDialogAi, 
     ResponseDialogAi
 )

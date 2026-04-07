@@ -63,7 +63,7 @@ system_prompt_text = """
 
 llm = ChatQwQ(
     api_key=config.QWEN_API_KEY,
-    model="qwen3.5-plus", 
+    model="qwen3.6-plus", 
     temperature=0.1,
     extra_body={
         "enable_thinking": True,

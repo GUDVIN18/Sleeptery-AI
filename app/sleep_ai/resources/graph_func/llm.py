@@ -30,9 +30,10 @@ langfuse_handler = CallbackHandler()
 agent_helper=create_agent(
     model=ChatQwQ(
         api_key=config.QWEN_API_KEY,
-        model=config.MODEL_SLEEP_AI,
+        # model=config.MODEL_SLEEP_AI,
+        model="qwen3.5-flash",
         temperature=0.05,
-        top_p=0.95,
+        top_p=0.90,
         extra_body={
             "enable_thinking": True,
             "thinking_budget": 100,

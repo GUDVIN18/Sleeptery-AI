@@ -6,7 +6,6 @@ from typing import List, Dict, Any
 from .resources.schemas.dialog import (
     ResponseDialogAi, 
     UploadDialogAi, 
-    ResponseFormatAi, 
     ResponseMessage,
     DialogAi
 )
@@ -33,8 +32,8 @@ async def dialog(
     try:
         dialogai_answer: DialogAi = await geration_pipe(data=data)
         return ResponseDialogAi(
-            answer=dialogai_answer.answer,
-            button=dialogai_answer.button
+            message=dialogai_answer.answer,
+            buttons=dialogai_answer.buttons
         )
     except Exception as e:
         log.error(f"Unhandled error in /chat endpoint: {e}")

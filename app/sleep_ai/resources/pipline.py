@@ -6,8 +6,7 @@ from app.include.logging_config import logger as log
 from .schemas.sleepai import (
     UploadSleepAi, 
     SleepGraphAi,
-    AdviceType,
-    AdviceLLMResponse
+    AdviceType
 )
 from .exceptions import (
     SleepAiErrorGeneration,
@@ -24,7 +23,7 @@ from .graph_func.graph import (
 )
 
 
-async def geration_pipe(sleep_data: UploadSleepAi) -> AdviceLLMResponse:
+async def geration_pipe(sleep_json: UploadSleepAi) -> SleepGraphAi:
     if not config.QWEN_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
     
@@ -53,18 +52,15 @@ async def geration_pipe(sleep_data: UploadSleepAi) -> AdviceLLMResponse:
     graph.add_edge("generation_response", END)
     app = graph.compile()
 
-    initial_state = SleepGraphAi(sleep_data=sleep_data)
+    initial_state = SleepGraphAi(sleep_json=sleep_json)
     result = await app.ainvoke(initial_state)
-    result_format_ai = AdviceLLMResponse(
-        **result
-    )
-    log.success(f"{result_format_ai=}")
-    return result_format_ai
+    log.success(f"{result=}")
+    return SleepGraphAi(**result)
 
 
 if __name__ == "__main__":
-    user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep.json"
+    user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep_debug.json"
     with open(user_prompt_path, "r") as f:
-        sleep_data = f.read()
+        sleep_json = f.read()
 
-    asyncio.run(geration_pipe(sleep_data=json.loads(sleep_data)))
+    asyncio.run(geration_pipe(sleep_json=json.loads(sleep_json)))

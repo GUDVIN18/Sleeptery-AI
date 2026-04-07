@@ -1,13 +1,13 @@
 from typing import Dict, Optional
 from langchain_core.output_parsers import JsonOutputParser
 from app.sleep_ai.resources.schemas.sleepai import (
-    AdviceLLMResponse,
+    SleepGraphAi,
     AdviceClassifier,
 )
 
 
 # parser = JsonOutputParser(pydantic_object=SleepGraphAi)
-parser = JsonOutputParser(pydantic_object=AdviceLLMResponse)
+parser = JsonOutputParser(pydantic_object=SleepGraphAi)
 classifier_parser = JsonOutputParser(
     pydantic_object=AdviceClassifier
 )

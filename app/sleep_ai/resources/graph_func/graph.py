@@ -13,15 +13,15 @@ from ..RAG.rag_langchain import retrieve_context
 async def init_models(state: SleepGraphAi) -> SleepGraphAi:
     """Узле для сборки модели SleepGraphAi"""
     log.info(f"Начали собирать данные")
-    user_diary_records = extract_full_block(state.sleep_data["user_diary_records"])
-    sleep_daily_stats = extract_full_block(state.sleep_data["sleep_daily_stats"])
+    user_diary_records = extract_full_block(state.sleep_json["user_diary_records"])
+    sleep_daily_stats = extract_full_block(state.sleep_json["sleep_daily_stats"])
     sleep_weekly_stats = {
         date: extract_full_block(day)
-        for date, day in state.sleep_data["sleep_daily_stats"].items()
+        for date, day in state.sleep_json["sleep_daily_stats"].items()
     }
     history_sleep_assessment = [
         extract_full_block(day)
-        for day in state.sleep_data["history_sleep_assessment"]
+        for day in state.sleep_json["history_sleep_assessment"]
     ]
 
     state.user_diary_records=user_diary_records
@@ -60,11 +60,6 @@ async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
 #     # тут по сути должна быть логика или ИИ которая формирует тип совета (генерация нового или оценка старого)
 #     state.advice_type=AdviceType.ANALYSIS_ADVICE.value
 #     return state
-
-def build_button(mission: Optional[str]) -> Optional[str]:
-    if not mission:
-        return None
-    return f"Добавить {mission} в дневник"
 
 def extract_habits(block: dict):
     default_habits = block.get("default_habits")
@@ -118,7 +113,7 @@ Cон за сегодня:
 
     chain = prompt | classifier_llm | classifier_parser
 
-    habits = extract_habits(state.sleep_data["user_diary_records"])
+    habits = extract_habits(state.sleep_json["user_diary_records"])
     default_habits = habits["default_habits"]
     custom_habits = habits["custom_habits"]
     log.debug(f"{default_habits=}|{custom_habits=}")
@@ -182,7 +177,6 @@ async def llm_analysis_response(state: SleepGraphAi) -> SleepGraphAi:
     state.response = result["response"]
     state.diary_recommendation = result.get("diary_recommendation")
     state.mission = result.get("mission")
-    state.button = build_button(state.mission)
     log.debug(f"Завершили создание совета на основе ритуала/миссии")
     return state
 
@@ -234,6 +228,5 @@ async def llm_generation_response(state: SleepGraphAi) -> SleepGraphAi:
     state.response = result["response"]
     state.diary_recommendation = result.get("diary_recommendation")
     state.mission = result.get("mission")
-    state.button = build_button(state.mission)
     log.debug(f"Завершили создание нового совета")
     return state

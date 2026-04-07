@@ -12,7 +12,6 @@ from ..schemas.dialog import (
 )
 
 
-
 def _current_history(state: DialogAi) -> DialogAi:
     """Узел для получения истории сообщений"""
     current_history = RedisClient(
@@ -95,15 +94,30 @@ async def llm_response(state: DialogAi) -> DialogAi:
     )
 
     chain = prompt_template | main_llm | parser
-
-    response = await chain.ainvoke({
-        "sleep_json": sleep_data_str,
-        "sleep_assessment": state.sleep_assessment or "Не предоставлен",
-        "context": state.context_vector_db,
-        "history": state.history_messages,
-        "question": state.message
-    })
-    log.debug(f"{state.user_id}: {response=}")
-    state.answer = response['answer']
-    state.button = response['button']
+    try:
+        response = await chain.ainvoke({
+            "sleep_json": sleep_data_str,
+            "sleep_assessment": state.sleep_assessment or "Не предоставлен",
+            "context": state.context_vector_db,
+            "history": state.history_messages,
+            "question": state.message
+        })
+        log.debug(f"{state.user_id}: {response=}")
+        state.answer = response['answer']
+        log.debug(f"{state.user_id}: Полученные кнопки из ответа: {response['buttons']=}")
+        state.buttons = response['buttons']
+    except Exception as e:
+        log.error(f"{state.user_id}: Ошибка в llm_response: {e}")
     return state
+
+
+async def _build_button(state: DialogAi) -> DialogAi:
+    """Узел для формированя кнопок в ответе (если есть необходимость)
+    
+    Кнопки бывают 2х типов:
+    1) 'Добавить (название совета) в дневник' - если в ответе есть конкретный совет/ритуал, который нужно добавить в дневник
+    2) '(очень краткое название ритуала/совета)' - мы можем предложить добавить пользователю 1 или несколько ритуалов/советов, 
+    которые он может также добавить в дневник для отслеживания прогресса. В этом случае название кнопки - это очень краткое название ритуала/совета, который мы предлагаем добавить. 
+
+    """
+
