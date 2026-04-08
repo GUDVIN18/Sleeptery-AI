@@ -63,7 +63,7 @@ async def retrieve_context(
 
         docs = await vector_store.asimilarity_search(
             query=topic,
-            k=3,
+            k=5,
             filter=filter_condition 
         )
         if docs:
