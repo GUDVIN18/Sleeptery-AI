@@ -32,6 +32,7 @@ class AdviceClassifier(BaseModel):
 
 
 class UploadSleepAi(BaseModel):
+    user_id: Optional[int] = Field(None, description="ID пользователя")
     sleep_json: Dict[str, Any] = Field(
         description="Сон пользователя"
     )

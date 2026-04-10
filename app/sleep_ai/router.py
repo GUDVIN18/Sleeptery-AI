@@ -19,7 +19,7 @@ router = APIRouter()
 )
 async def analyze_sleep(data: UploadSleepAi):
     try:
-        log.success(f"Успешно приняли сон!")
+        log.success(f"user_id={data.user_id}: GENERATION ADVICE!")
         sleepai_answer: SleepGraphAi = await geration_pipe(data.sleep_json)
         return ResponseSleepAi(
             sleep_assessment=sleepai_answer.sleep_assessment,

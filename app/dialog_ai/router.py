@@ -28,7 +28,7 @@ router = APIRouter()
 async def dialog(
     data: UploadDialogAi,
 ):
-    log.info(f"{data=}")
+    log.success(f"QUESTION: {data.user_id}: {data=}")
     try:
         dialogai_answer: DialogAi = await geration_pipe(data=data)
         return ResponseDialogAi(
