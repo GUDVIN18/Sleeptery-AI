@@ -2,7 +2,8 @@ from pydantic import BaseModel, Field
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Literal, List
 from enum import Enum
-
+from .app import AppVersion
+from datetime import date
 
 @dataclass
 class ResponseFormat:
@@ -30,8 +31,9 @@ class AdviceType(str, Enum):
 class AdviceClassifier(BaseModel):
     advice_type: AdviceType
 
-
 class UploadSleepAi(BaseModel):
+    app_version: Optional[AppVersion] = Field(AppVersion.PROD, description="Версия приложения")
+    sleep_date: Optional[date] = Field(None, description="Дата сна в формате YYYY-MM-DD")
     user_id: Optional[int] = Field(None, description="ID пользователя")
     sleep_json: Dict[str, Any] = Field(
         description="Сон пользователя"

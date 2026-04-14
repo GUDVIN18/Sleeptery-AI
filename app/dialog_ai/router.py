@@ -10,8 +10,6 @@ from .resources.schemas.dialog import (
     DialogAi
 )
 from .resources.pipline import geration_pipe
-from .resources.redis_client import RedisClient
-# from loguru import logger as log
 from app.include.logging_config import logger as log
 from ..include.permissions import secret_access
 from .resources.exceptions import DialogAiErrorGeneration
@@ -28,7 +26,7 @@ router = APIRouter()
 async def dialog(
     data: UploadDialogAi,
 ):
-    log.success(f"QUESTION: {data.user_id}: {data=}")
+    log.success(f"{data.user_id}: QUESTION {data=}")
     try:
         dialogai_answer: DialogAi = await geration_pipe(data=data)
         return ResponseDialogAi(
@@ -39,30 +37,30 @@ async def dialog(
         log.error(f"Unhandled error in /chat endpoint: {e}")
         raise DialogAiErrorGeneration
 
-@router.get(
-    "/history",
-    response_model=List[ResponseMessage],
-    dependencies=[Depends(secret_access)],
-    name="Получить историю диалога",
-)
-async def get_dialog_history(
-    user_id: int = Query(
-        description="Уникальный идентификатор пользователя"
-    ),
-    sleep_date: dt.date = Query(
-        description="Дата сна"
-    )
-):
-    log.info(f"Запрос истории диалога для пользователя {user_id} и даты сна {sleep_date}")
-    get_all_message = RedisClient(
-        session_id=f"{user_id}_{sleep_date}"
-    ).get_session_history().messages
-    result: List[ResponseMessage] = []
-    for msg in get_all_message:
-        result.append(
-            ResponseMessage(
-                type=msg.type,
-                message=msg.content
-            )
-        )
-    return result
+# @router.get(
+#     "/history",
+#     response_model=List[ResponseMessage],
+#     dependencies=[Depends(secret_access)],
+#     name="Получить историю диалога",
+# )
+# async def get_dialog_history(
+#     user_id: int = Query(
+#         description="Уникальный идентификатор пользователя"
+#     ),
+#     sleep_date: dt.date = Query(
+#         description="Дата сна"
+#     )
+# ):
+#     log.info(f"Запрос истории диалога для пользователя {user_id} и даты сна {sleep_date}")
+#     get_all_message = RedisClient(
+#         session_id=f"{user_id}_{sleep_date}"
+#     ).get_session_history().messages
+#     result: List[ResponseMessage] = []
+#     for msg in get_all_message:
+#         result.append(
+#             ResponseMessage(
+#                 type=msg.type,
+#                 message=msg.content
+#             )
+#         )
+#     return result

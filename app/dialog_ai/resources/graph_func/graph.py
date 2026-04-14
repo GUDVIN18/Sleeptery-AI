@@ -1,6 +1,6 @@
 from langchain.agents import create_agent
 import json
-from ..redis_client import RedisClient
+from app.dialog_ai.resources.redis_async_client import AsyncRedisClient
 from langchain_core.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from app.include.logging_config import logger as log
@@ -12,17 +12,18 @@ from ..schemas.dialog import (
 )
 
 
-def _current_history(state: DialogAi) -> DialogAi:
+async def _current_history(state: DialogAi) -> DialogAi:
     """Узел для получения истории сообщений"""
-    current_history = RedisClient(
-        session_id=f"{state.user_id}_{state.sleep_date}"
-    ).get_session_history_v2(
-        user_id=state.user_id,
-        sleep_date=state.sleep_date
-    )
+    # Соединение само закроется, когда мы выйдем из блока async with
+    async with AsyncRedisClient(session_id=f"{state.user_id}_{state.sleep_date}") as client:
+        current_history = await client.get_session_history_v2(
+            user_id=state.user_id,
+            sleep_date=state.sleep_date
+        )
     state.history_messages = current_history
     log.debug(f"{state.user_id}: История подгружена. Всего {len(current_history)} сообщений.")
     return state
+
 
 async def llm_helper(state: DialogAi) -> DialogAi:
     """Узел для анализа проблемы пользователя (для RAG)"""

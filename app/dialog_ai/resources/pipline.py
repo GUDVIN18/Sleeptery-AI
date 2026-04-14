@@ -2,7 +2,7 @@ import json
 import time
 import asyncio
 from langgraph.graph import StateGraph, START, END
-from .redis_client import RedisClient
+from .redis_async_client import AsyncRedisClient
 from app.include.logging_config import logger as log
 from app.include.config import config
 from .schemas.dialog import (
@@ -52,18 +52,15 @@ async def geration_pipe(
     result = await app.ainvoke(initial_state)
     if result:
         try:
-            RedisClient(
-                session_id=f"{data.user_id}_{data.sleep_date}"
-            ).add_message(
-                role="user",
-                message=result['message']
-            )
-            RedisClient(
-                session_id=f"{data.user_id}_{data.sleep_date}"
-            ).add_message(
-                role="ai",
-                message=result['answer']
-            )
+            async with AsyncRedisClient(session_id=f"{data.user_id}_{data.sleep_date}") as client:
+                await client.add_message(
+                    role="user",
+                    message=result['message']
+                )
+                await client.add_message(
+                    role="ai",
+                    message=result['answer']
+                )
         except Exception as e:
             log.error(f"Ошибка в DialogAI при добавлении истории: {e}")
         end_time = time.time()

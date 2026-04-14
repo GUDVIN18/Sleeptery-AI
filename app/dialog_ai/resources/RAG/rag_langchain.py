@@ -29,7 +29,7 @@ try:
         model_name="DiTy/cross-encoder-russian-msmarco",
         model_kwargs={"trust_remote_code": True},
     )
-    reranker = CrossEncoderReranker(model=_cross_encoder, top_n=12)
+    reranker = CrossEncoderReranker(model=_cross_encoder, top_n=8)
     log.info("GTE multilingual reranker loaded successfully")
 except Exception as e:
     log.error(f"Failed to load reranker: {e}")
@@ -81,6 +81,6 @@ async def retriever_context(is_test: bool = False) -> ContextualCompressionRetri
     except Exception as e:
         log.error(f"Fallback to MMR due to: {e}")
         return vector_store.as_retriever(search_type="mmr", search_kwargs={"k": 5}) 
-    finally:
-        import gc
-        gc.collect()
+    # finally:
+    #     import gc
+    #     gc.collect()
