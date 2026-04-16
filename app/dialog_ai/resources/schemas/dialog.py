@@ -108,3 +108,10 @@ class DialogAi(UploadDialogAi):
 class ResponseMessage(BaseModel):
     type: str
     message: str
+
+
+class HelperLLMResponse(BaseModel):
+    answer: str = Field(
+        None,
+        description="Проблема пользователя для поиска в векторной БД"
+    )

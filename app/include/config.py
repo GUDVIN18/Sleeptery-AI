@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     COLLECTION_NAME_DIALOG_AI: str = Field(..., env="COLLECTION_NAME_DIALOG_AI")
     VECTOR_DIMENSION: int = Field(..., env="VECTOR_DIMENSION")
     BATCH_SIZE: int = Field(..., env="BATCH_SIZE")
-    FLASH_RANK_MODEL: str = Field(..., env="FLASH_RANK_MODEL")
+    RERANK_MODEL: str = Field(..., env="RERANK_MODEL")
 
     LANGFUSE_SECRET_KEY: str = Field(..., env="LANGFUSE_SECRET_KEY")
     LANGFUSE_PUBLIC_KEY: str = Field(..., env="LANGFUSE_PUBLIC_KEY")

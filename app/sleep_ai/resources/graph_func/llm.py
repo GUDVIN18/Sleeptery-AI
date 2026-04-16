@@ -51,7 +51,7 @@ main_llm=ChatQwQ(
     top_p=0.9001,
     extra_body={
         "enable_thinking": True,
-        "thinking_budget": 380,
+        "thinking_budget": 250,
     },
     callbacks=[langfuse_handler],
 )

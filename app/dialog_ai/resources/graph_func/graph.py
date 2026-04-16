@@ -1,17 +1,32 @@
 from langchain.agents import create_agent
 import json
+import time
 from app.dialog_ai.resources.redis_async_client import AsyncRedisClient
 from langchain_core.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from app.include.logging_config import logger as log
 from .llm import main_llm, llm_analytics, SYSTEM_INSTRUCTION, CONTEXT_PROMPT
-from .parcers import parser
+from .parcers import (
+    parser_main_llm,
+    parser_helper_llm,
+)
 from ..RAG.rag_langchain import retriever_context
 from ..schemas.dialog import (
     DialogAi
 )
 
 
+def current_time(func):
+    async def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = await func(*args, **kwargs)
+        end_time = time.time()
+        log.info(f"Время выполнения функции {func.__name__}: {end_time - start_time:.2f} секунд")
+        return result
+    return wrapper
+
+
+@current_time
 async def _current_history(state: DialogAi) -> DialogAi:
     """Узел для получения истории сообщений"""
     # Соединение само закроется, когда мы выйдем из блока async with
@@ -20,27 +35,49 @@ async def _current_history(state: DialogAi) -> DialogAi:
             user_id=state.user_id,
             sleep_date=state.sleep_date
         )
-    state.history_messages = current_history
+    state.history_messages = current_history[-20:]
     log.debug(f"{state.user_id}: История подгружена. Всего {len(current_history)} сообщений.")
     return state
 
-
+@current_time
 async def llm_helper(state: DialogAi) -> DialogAi:
     """Узел для анализа проблемы пользователя (для RAG)"""
-    context_prompt_analytics = ChatPromptTemplate.from_messages([
-        ("system", CONTEXT_PROMPT),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{input}"),
-    ])
-    chain_context = context_prompt_analytics | llm_analytics
-    result = await chain_context.ainvoke({
+    prompt_template_helper = PromptTemplate(
+        template="""
+    {system_instructions}
+
+    
+    История диалога:
+    {chat_history}
+
+    Вопрос пользователя:
+    {input}
+
+    {format_instructions}
+
+    Верни ТОЛЬКО JSON без дополнительных комментариев! 
+    не допускай использование английскийх слов в ответе
+    """,
+        input_variables=[
+            "chat_history",
+            "input",
+        ],
+        partial_variables={
+            "system_instructions": CONTEXT_PROMPT,
+            "format_instructions": parser_helper_llm.get_format_instructions(),
+        }
+    )
+
+    chain = prompt_template_helper | llm_analytics | parser_helper_llm
+    result = await chain.ainvoke({
         "chat_history": state.history_messages,
         "input": state.message
     })
-    state.context_rag_search = result.content
-    log.info(f"{state.user_id}: Проблема для поиска в бд: {result.content}")
+    state.context_rag_search = result['answer']
+    log.info(f"{state.user_id}: Проблема для поиска в бд: {result['answer']}")
     return state
 
+@current_time
 async def search_vector_db(state: DialogAi) -> DialogAi:
     """Узел для поиска докуметов в векторной БД"""
     retriever = await retriever_context(is_test=state.test_mode)
@@ -50,6 +87,7 @@ async def search_vector_db(state: DialogAi) -> DialogAi:
     log.debug(f"{state.user_id}: Найдено {len(docs)} документов")
     return state
 
+@current_time
 async def llm_response(state: DialogAi) -> DialogAi:
     """Узел для ответа пользователю на вопрос по контексту из базы знаний"""
     if state.sleep_json:
@@ -89,12 +127,12 @@ async def llm_response(state: DialogAi) -> DialogAi:
             "question",
         ],
         partial_variables={
-            "format_instructions": parser.get_format_instructions(),
+            "format_instructions": parser_main_llm.get_format_instructions(),
             "system_instructions": SYSTEM_INSTRUCTION
         }
     )
 
-    chain = prompt_template | main_llm | parser
+    chain = prompt_template | main_llm | parser_main_llm
     try:
         response = await chain.ainvoke({
             "sleep_json": sleep_data_str,
@@ -110,15 +148,4 @@ async def llm_response(state: DialogAi) -> DialogAi:
     except Exception as e:
         log.error(f"{state.user_id}: Ошибка в llm_response: {e}")
     return state
-
-
-async def _build_button(state: DialogAi) -> DialogAi:
-    """Узел для формированя кнопок в ответе (если есть необходимость)
-    
-    Кнопки бывают 2х типов:
-    1) 'Добавить (название совета) в дневник' - если в ответе есть конкретный совет/ритуал, который нужно добавить в дневник
-    2) '(очень краткое название ритуала/совета)' - мы можем предложить добавить пользователю 1 или несколько ритуалов/советов, 
-    которые он может также добавить в дневник для отслеживания прогресса. В этом случае название кнопки - это очень краткое название ритуала/совета, который мы предлагаем добавить. 
-
-    """
 

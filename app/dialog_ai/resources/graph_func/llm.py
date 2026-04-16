@@ -24,12 +24,12 @@ langfuse_handler = CallbackHandler()
 
 llm_analytics = ChatQwQ(
     api_key=config.QWEN_API_KEY,
-    model=config.MODEL_DIALOG_AI,
+    # model=config.MODEL_DIALOG_AI,
+    model="qwen3.5-flash",
     temperature=0.1,
-    top_p=0.95,
+    top_p=0.9,
     extra_body={
-        "enable_thinking": True,
-        "thinking_budget": 40,
+        "enable_thinking": False,
     },
     callbacks=[langfuse_handler],
 )
@@ -40,7 +40,7 @@ main_llm=ChatQwQ(
     top_p=0.95,
     extra_body={
         "enable_thinking": True,
-        "thinking_budget": 110,
+        "thinking_budget": 50,
     },
     callbacks=[langfuse_handler],
 )
