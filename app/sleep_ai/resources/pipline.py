@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 import asyncio
 import json
+import time
 from app.include.config import config
 from app.include.logging_config import logger as log
 from .schemas.sleepai import (
@@ -23,10 +24,10 @@ from .graph_func.graph import (
 )
 
 
-async def geration_pipe(sleep_json: UploadSleepAi) -> SleepGraphAi:
+async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
     if not config.QWEN_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
-    
+    start_time = time.time()
     graph = StateGraph(SleepGraphAi)
     # добавляем node (узлы = наши функции)
     graph.add_node("init_models", init_models)
@@ -52,9 +53,13 @@ async def geration_pipe(sleep_json: UploadSleepAi) -> SleepGraphAi:
     graph.add_edge("generation_response", END)
     app = graph.compile()
 
-    initial_state = SleepGraphAi(sleep_json=sleep_json)
+    initial_state = SleepGraphAi(**data.model_dump())
     result = await app.ainvoke(initial_state)
     log.success(f"{result=}")
+
+    end_time = time.time()
+    log.success(f"{data.user_id}: SLLEP_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
+
     return SleepGraphAi(**result)
 
 
@@ -62,5 +67,10 @@ if __name__ == "__main__":
     user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep_debug.json"
     with open(user_prompt_path, "r") as f:
         sleep_json = f.read()
-
-    asyncio.run(geration_pipe(sleep_json=json.loads(sleep_json)))
+        data_test = UploadSleepAi(
+            app_version="dev",
+            user_id=123,
+            sleep_date="2024-10-01",
+            sleep_json=json.loads(sleep_json)
+        )
+    asyncio.run(geration_pipe(data=data_test))

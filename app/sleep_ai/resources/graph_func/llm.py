@@ -33,10 +33,9 @@ agent_helper=create_agent(
         model=config.MODEL_SLEEP_AI,
         temperature=0.1,
         top_p=0.9001,
-        # extra_body={
-        #     "enable_thinking": True,
-        #     "thinking_budget": 400,
-        # },
+        extra_body={
+            "enable_thinking": False,
+        },
         callbacks=[langfuse_handler],
     ),
     system_prompt=HELP_MODEL_INSTRUCTION,

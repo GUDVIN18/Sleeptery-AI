@@ -27,7 +27,7 @@ async def analyze_sleep(data: UploadSleepAi):
         ) as client:
             if await client.create_cache_advice():
                 log.success(f"{data.app_version} user_id={data.user_id}: GENERATION ADVICE!")
-                sleepai_answer: SleepGraphAi = await geration_pipe(data.sleep_json)
+                sleepai_answer: SleepGraphAi = await geration_pipe(data=data)
                 return ResponseSleepAi(
                     sleep_assessment=sleepai_answer.sleep_assessment,
                     response=f"{sleepai_answer.response} {sleepai_answer.diary_recommendation}",

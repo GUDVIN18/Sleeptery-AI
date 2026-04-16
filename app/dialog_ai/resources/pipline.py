@@ -60,7 +60,7 @@ async def geration_pipe(
         except Exception as e:
             log.error(f"Ошибка в DialogAI при добавлении истории: {e}")
         end_time = time.time()
-        log.success(f"{data.user_id}: Pipeline execution time: {end_time - start_time:.2f} seconds")
+        log.success(f"{data.user_id}: DIALOG_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
         return DialogAi(**result)
 
 

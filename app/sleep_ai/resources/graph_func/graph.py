@@ -8,8 +8,10 @@ from langchain_core.prompts import PromptTemplate
 from .parcers import extract_full_block, parser, classifier_parser
 from .llm import main_llm, agent_helper, classifier_llm, SYSTEM_INSTRUCTION
 from ..RAG.rag_langchain import retrieve_context
+from app.include.decorator import current_time
 
 
+@current_time
 async def init_models(state: SleepGraphAi) -> SleepGraphAi:
     """Узле для сборки модели SleepGraphAi"""
     log.info(f"Начали собирать данные")
@@ -30,6 +32,7 @@ async def init_models(state: SleepGraphAi) -> SleepGraphAi:
     state.history_sleep_assessment=history_sleep_assessment
     return state
 
+@current_time
 async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
     """Узел для анализа проблемы и поика в векторной БД"""
     helper_analytics = await agent_helper.ainvoke(
@@ -49,7 +52,7 @@ async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
     log.info(f"Нашли context_vector_db и завершили llm_search")
     return state
 
-
+# @current_time
 # async def llm_analysis(state: SleepGraphAi) -> SleepGraphAi:
 #     """Узел для анализа дневника: 
 #     Если в дневнике есть привычка или ритуал, то: 
@@ -61,6 +64,7 @@ async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
 #     state.advice_type=AdviceType.ANALYSIS_ADVICE.value
 #     return state
 
+
 def extract_habits(block: dict):
     default_habits = block.get("default_habits")
     custom_habits = block.get("custom_habits")
@@ -70,6 +74,7 @@ def extract_habits(block: dict):
         "custom_habits": custom_habits if custom_habits else None,
     }
 
+@current_time
 async def llm_advice_classifier(state: SleepGraphAi) -> SleepGraphAi:
     """
     Определяет тип совета с помощью LLM
@@ -129,7 +134,6 @@ Cон за сегодня:
     log.info(f"Определили тип будущего совета: {state.advice_type}")
     return state
 
-
 def route_advice(state: SleepGraphAi) -> str:
     if state.advice_type == AdviceType.ANALYSIS_ADVICE.value:
         return AdviceType.ANALYSIS_ADVICE.value
@@ -137,6 +141,7 @@ def route_advice(state: SleepGraphAi) -> str:
         return AdviceType.GENERATION_ADVICE.value
     return AdviceType.GENERATION_ADVICE.value
 
+@current_time
 async def llm_analysis_response(state: SleepGraphAi) -> SleepGraphAi:
     """Совет на основе уже существующего ритуала"""
 
@@ -180,6 +185,7 @@ async def llm_analysis_response(state: SleepGraphAi) -> SleepGraphAi:
     log.debug(f"Завершили создание совета на основе ритуала/миссии")
     return state
 
+@current_time
 async def llm_generation_response(state: SleepGraphAi) -> SleepGraphAi:
     """Генерация нового совета"""
 

@@ -1,6 +1,5 @@
 from langchain.agents import create_agent
 import json
-import time
 from app.dialog_ai.resources.redis_async_client import AsyncRedisClient
 from langchain_core.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -14,16 +13,7 @@ from ..RAG.rag_langchain import retriever_context
 from ..schemas.dialog import (
     DialogAi
 )
-
-
-def current_time(func):
-    async def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = await func(*args, **kwargs)
-        end_time = time.time()
-        log.info(f"Время выполнения функции {func.__name__}: {end_time - start_time:.2f} секунд")
-        return result
-    return wrapper
+from app.include.decorator import current_time
 
 
 @current_time
