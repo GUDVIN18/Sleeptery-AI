@@ -29,7 +29,7 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
         raise SleepAiErrorConnect("API key is not set.")
     start_time = time.time()
     graph = StateGraph(SleepGraphAi)
-    # добавляем node (узлы = наши функции)
+    # узлы
     graph.add_node("init_models", init_models)
     graph.add_node("llm_search", llm_search)
     # graph.add_node("llm_analysis", llm_analysis)
@@ -37,7 +37,7 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
     graph.add_node("analysis_response", llm_analysis_response)
     graph.add_node("generation_response", llm_generation_response)
 
-    # Теперь выстраиваем ребра (последоваельность)
+    # ребра
     graph.add_edge(START, "init_models")
     graph.add_edge("init_models", "llm_search")
     graph.add_edge("llm_search", "llm_advice_classifier")

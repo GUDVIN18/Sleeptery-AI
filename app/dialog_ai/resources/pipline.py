@@ -29,13 +29,13 @@ async def geration_pipe(
     start_time = time.time()
     graph = StateGraph(DialogAi)
 
-    # добавляем node (узлы = наши функции)
+    # node
     graph.add_node("_current_history", _current_history)
     graph.add_node("llm_helper", llm_helper)
     graph.add_node("search_vector_db", search_vector_db)
     graph.add_node("llm_response", llm_response)
 
-    # Теперь выстраиваем ребра (последоваельность)
+    # ребра
     graph.add_edge(START, "_current_history")
     graph.add_edge("_current_history", "llm_helper")
     graph.add_edge("llm_helper", "search_vector_db")
