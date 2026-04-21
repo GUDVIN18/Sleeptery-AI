@@ -45,7 +45,7 @@ async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
             ]
         }
     )
-    problems = helper_analytics['structured_response'].analysis
+    problems = helper_analytics['structured_response'].recommendations
     log.info(f"Extracted problems: {problems} ")
     rag_answer = await retrieve_context(topics=problems, is_test=True) # is_test=config.TEST_MODE_DB
     state.context_vector_db=rag_answer

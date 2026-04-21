@@ -7,7 +7,15 @@ from datetime import date
 
 @dataclass
 class ResponseFormat:
-    analysis: List[str]
+    recommendations: List[str] = Field(
+        description=(
+            "Список из 1 или 2 рекомендаций, выбранных строго из Mapping. "
+            "Каждая строка должна полностью совпадать с названием совета (без изменений). "
+            "Разрешены только значения из списка. "
+            "Нельзя добавлять объяснения, комментарии или любые другие поля. "
+            "Если явной проблемы нет — вернуть ['Совет 1: Что такое сон']."
+        )
+    )
 
 # для fastapi роутера
 class ResponseSleepAi(BaseModel):

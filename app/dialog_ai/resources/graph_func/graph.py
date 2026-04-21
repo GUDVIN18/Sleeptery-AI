@@ -138,4 +138,3 @@ async def llm_response(state: DialogAi) -> DialogAi:
     except Exception as e:
         log.error(f"{state.user_id}: Ошибка в llm_response: {e}")
     return state
-
