@@ -30,6 +30,7 @@ async def init_models(state: SleepGraphAi) -> SleepGraphAi:
     state.sleep_daily_stats=sleep_daily_stats
     state.sleep_weekly_stats=sleep_weekly_stats
     state.history_sleep_assessment=history_sleep_assessment
+    print("Завершили сбор данных и перешли к llm_search")
     return state
 
 @current_time
@@ -49,7 +50,6 @@ async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
     log.info(f"Extracted problems: {problems} ")
     rag_answer = await retrieve_context(topics=problems, is_test=True) # is_test=config.TEST_MODE_DB
     state.context_vector_db=rag_answer
-    log.info(f"Нашли context_vector_db и завершили llm_search")
     return state
 
 # @current_time

@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     LANGFUSE_PUBLIC_KEY: str = Field(..., env="LANGFUSE_PUBLIC_KEY")
     LANGFUSE_BASE_URL: str = Field(..., env="LANGFUSE_BASE_URL")
 
+    KAFKA_BROKER_URL: str = Field(..., env="KAFKA_BROKER_URL")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

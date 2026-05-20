@@ -22,6 +22,7 @@ from .graph_func.graph import (
     llm_generation_response,
     route_advice
 )
+from confluent_kafka import Producer
 
 
 async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
@@ -55,22 +56,40 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
 
     initial_state = SleepGraphAi(**data.model_dump())
     result = await app.ainvoke(initial_state)
-    log.success(f"{result=}")
+    result = SleepGraphAi(**result)
+    log.debug(f"{result=}")
 
     end_time = time.time()
     log.success(f"{data.user_id}: SLLEP_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
 
-    return SleepGraphAi(**result)
+
+    producer = Producer({
+        'bootstrap.servers': config.KAFKA_BROKER_URL,
+        'client.id': 'sleep_ai_ready_generation',
+        'acks': 'all',
+        'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
+        'retries': 5, # количество попыток повторной отправки в случае неудачи
+        'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
+    })
+    producer.produce(
+        topic="sleep_ai_ready_generation",
+        key=f"{result.user_id}", # для каждого пользователя совет будет в одном партиции
+        value=result.model_dump_json().encode('utf-8')
+    )
+    producer.flush()
 
 
-if __name__ == "__main__":
-    user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep_debug.json"
-    with open(user_prompt_path, "r") as f:
-        sleep_json = f.read()
-        data_test = UploadSleepAi(
-            app_version="dev",
-            user_id=123,
-            sleep_date="2024-10-01",
-            sleep_json=json.loads(sleep_json)
-        )
-    asyncio.run(geration_pipe(data=data_test))
+    return result
+
+
+# if __name__ == "__main__":
+#     user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep_debug.json"
+#     with open(user_prompt_path, "r") as f:
+#         sleep_json = f.read()
+#         data_test = UploadSleepAi(
+#             app_version="dev",
+#             user_id=123,
+#             sleep_date="2024-10-01",
+#             sleep_json=json.loads(sleep_json)
+#         )
+#     asyncio.run(geration_pipe(data=data_test))

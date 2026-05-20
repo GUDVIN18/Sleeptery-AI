@@ -25,3 +25,13 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       HF_TOKEN: ${HF_TOKEN}
     restart: always
+  
+  consumer:
+    restart: always
+    build: .
+    container_name: consumer
+    command: bash -c "python -m app.tasks.consumer"
+    env_file:
+        - .env
+    volumes:
+        - /sleeptery/Sleeptery-AI/logs:/app/logs
