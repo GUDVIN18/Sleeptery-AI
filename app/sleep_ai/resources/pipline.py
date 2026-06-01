@@ -7,7 +7,8 @@ from app.include.logging_config import logger as log
 from .schemas.sleepai import (
     UploadSleepAi, 
     SleepGraphAi,
-    AdviceType
+    AdviceType,
+    AppVersion
 )
 from .exceptions import (
     SleepAiErrorGeneration,
@@ -64,7 +65,7 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
 
 
     producer = Producer({
-        'bootstrap.servers': config.KAFKA_BROKER_URL,
+        'bootstrap.servers': config.KAFKA_BROKER_URL_DEV if result.app_version == AppVersion.DEV else config.KAFKA_BROKER_URL_PROD,
         'client.id': 'sleep_ai_ready_generation',
         'acks': 'all',
         'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,

@@ -10,11 +10,10 @@ from app.include.logging_config import logger as log
 
 background_task: set[asyncio.Task] = set()
 
-
 async def run():
     log.info(f"Starting Kafka consumer...")
     c = AIOConsumer({
-        'bootstrap.servers': config.KAFKA_BROKER_URL,
+        'bootstrap.servers': config.KAFKA_BROKER_URL_PROD,
         'group.id': 'sleep_ai_pending_generation',
         'auto.offset.reset': 'earliest',
         'isolation.level': 'read_committed',

@@ -26,11 +26,21 @@ services:
       HF_TOKEN: ${HF_TOKEN}
     restart: always
   
-  consumer:
+  consumer_dev:
     restart: always
     build: .
-    container_name: consumer
-    command: bash -c "python -m app.tasks.consumer"
+    container_name: consumer_dev
+    command: bash -c "python -m app.tasks.consumer_dev"
+    env_file:
+        - .env
+    volumes:
+        - /sleeptery/Sleeptery-AI/logs:/app/logs
+
+  consumer_prod:
+    restart: always
+    build: .
+    container_name: consumer_prod
+    command: bash -c "python -m app.tasks.consumer_prod"
     env_file:
         - .env
     volumes:
