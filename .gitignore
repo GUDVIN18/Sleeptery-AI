@@ -4,3 +4,5 @@
 *.log
 .codex
 .zip
+.log.zip
+*.log.zip
