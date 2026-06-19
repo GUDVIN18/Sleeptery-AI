@@ -39,8 +39,8 @@ main_llm=ChatQwQ(
     temperature=0.3,
     top_p=0.95,
     extra_body={
-        "enable_thinking": True,
-        "thinking_budget": 50,
+        "enable_thinking": False,
+        # "thinking_budget": 50,
     },
     callbacks=[langfuse_handler],
 )
