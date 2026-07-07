@@ -5,6 +5,9 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY ./requirements.st_bases.txt /requirements.st_bases.txt
+RUN pip install --no-cache-dir -r /requirements.st_bases.txt
+
 COPY . /app
 
 ENV PYTHONPATH=/app

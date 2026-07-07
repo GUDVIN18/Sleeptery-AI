@@ -1,6 +1,7 @@
 import json
 import time
 import asyncio
+import traceback
 from langgraph.graph import StateGraph, START, END
 from .redis_async_client import AsyncRedisClient
 from app.include.logging_config import logger as log
@@ -18,6 +19,7 @@ from .graph_func.graph import (
     search_vector_db,
     llm_response,
 )
+from st_bases.telegram import TgLog
 
 
 async def geration_pipe(
@@ -42,26 +44,30 @@ async def geration_pipe(
     graph.add_edge("search_vector_db", "llm_response")
     graph.add_edge("llm_response", END)
     app = graph.compile()
+    
+    try:
+        initial_state = DialogAi(**data.model_dump(), test_mode=is_test)
 
-    initial_state = DialogAi(**data.model_dump(), test_mode=is_test)
-
-    result = await app.ainvoke(initial_state)
-    if result:
-        try:
-            async with AsyncRedisClient(session_id=f"{data.user_id}_{data.sleep_date}") as client:
-                await client.add_message(
-                    role="user",
-                    message=result['message']
-                )
-                await client.add_message(
-                    role="ai",
-                    message=result['answer']
-                )
-        except Exception as e:
-            log.error(f"Ошибка в DialogAI при добавлении истории: {e}")
-        end_time = time.time()
-        log.success(f"{data.user_id}: DIALOG_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
-        return DialogAi(**result)
+        result = await app.ainvoke(initial_state)
+        if result:
+            try:
+                async with AsyncRedisClient(session_id=f"{data.user_id}_{data.sleep_date}") as client:
+                    await client.add_message(
+                        role="user",
+                        message=result['message']
+                    )
+                    await client.add_message(
+                        role="ai",
+                        message=result['answer']
+                    )
+            except Exception as e:
+                log.error(f"Ошибка в DialogAI при добавлении истории: {e}")
+            end_time = time.time()
+            log.success(f"{data.user_id}: DIALOG_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
+            return DialogAi(**result)
+    except Exception:
+        await TgLog.error(f"DIALOG_AI Pipeline error: {traceback.format_exc()}")
+        raise
 
 
 

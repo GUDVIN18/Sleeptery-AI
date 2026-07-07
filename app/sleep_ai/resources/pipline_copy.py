@@ -9,7 +9,6 @@ from typing import List
 from langchain.chat_models import init_chat_model
 from langchain_deepseek import ChatDeepSeek
 from openai import OpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool, ToolRuntime
 from langgraph.checkpoint.memory import InMemorySaver

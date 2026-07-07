@@ -3,7 +3,6 @@ import torch
 import asyncio
 import time
 from langchain_qdrant import QdrantVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest_models
 import time

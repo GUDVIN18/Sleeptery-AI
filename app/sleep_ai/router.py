@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import Connection
+from sqlalchemy.engine import Connection
 from typing import List, Dict, Any
 from .resources.schemas.sleepai import ResponseSleepAi, UploadSleepAi, SleepGraphAi
 from .resources.pipline import geration_pipe

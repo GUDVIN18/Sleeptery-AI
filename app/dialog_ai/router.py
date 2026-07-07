@@ -1,7 +1,7 @@
 import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import Connection
+from sqlalchemy.engine import Connection
 from typing import List, Dict, Any
 from .resources.schemas.dialog import (
     ResponseDialogAi, 

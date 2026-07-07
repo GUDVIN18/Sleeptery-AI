@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 import asyncio
 import json
+import traceback
 import time
 from app.include.config import config
 from app.include.logging_config import logger as log
@@ -24,11 +25,20 @@ from .graph_func.graph import (
     route_advice
 )
 from confluent_kafka import Producer
+from st_bases.telegram import TgLog
 
 
 async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
     if not config.QWEN_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
+    producer = Producer({
+        'bootstrap.servers': config.KAFKA_BROKER_URL_DEV if data.app_version == AppVersion.DEV else config.KAFKA_BROKER_URL_PROD,
+        'client.id': 'sleep_ai_ready_generation',
+        'acks': 'all',
+        'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
+        'retries': 5, # количество попыток повторной отправки в случае неудачи
+        'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
+    })
     start_time = time.time()
     graph = StateGraph(SleepGraphAi)
     # узлы
@@ -55,32 +65,24 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
     graph.add_edge("generation_response", END)
     app = graph.compile()
 
-    initial_state = SleepGraphAi(**data.model_dump())
-    result = await app.ainvoke(initial_state)
-    result = SleepGraphAi(**result)
-    log.debug(f"{result=}")
+    try:
+        initial_state = SleepGraphAi(**data.model_dump())
+        result = await app.ainvoke(initial_state)
+        result = SleepGraphAi(**result)
+        log.debug(f"{result=}")
 
-    end_time = time.time()
-    log.success(f"{data.user_id}: SLLEP_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
-
-
-    producer = Producer({
-        'bootstrap.servers': config.KAFKA_BROKER_URL_DEV if result.app_version == AppVersion.DEV else config.KAFKA_BROKER_URL_PROD,
-        'client.id': 'sleep_ai_ready_generation',
-        'acks': 'all',
-        'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
-        'retries': 5, # количество попыток повторной отправки в случае неудачи
-        'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
-    })
-    producer.produce(
-        topic="sleep_ai_ready_generation",
-        key=f"{result.user_id}", # для каждого пользователя совет будет в одном партиции
-        value=result.model_dump_json().encode('utf-8')
-    )
-    producer.flush()
-
-
-    return result
+        end_time = time.time()
+        log.success(f"{data.user_id}: SLLEP_AI Pipeline execution time: {end_time - start_time:.2f} seconds")
+        producer.produce(
+            topic="sleep_ai_ready_generation",
+            key=f"{result.user_id}", # для каждого пользователя совет будет в одном партиции
+            value=result.model_dump_json().encode('utf-8')
+        )
+        producer.flush()
+        return result
+    except Exception:
+        await TgLog.error(f"SLLEP_AI Pipeline error: {traceback.format_exc()}")
+        raise
 
 
 # if __name__ == "__main__":

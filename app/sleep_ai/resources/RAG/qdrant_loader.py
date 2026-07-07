@@ -1,5 +1,3 @@
-from google import genai
-from google.genai import types
 from pathlib import Path
 import pdfplumber
 import os
@@ -8,7 +6,6 @@ from qdrant_client import QdrantClient, models
 from qdrant_client.models import Distance, VectorParams
 from tqdm import tqdm
 from langchain_text_splitters import MarkdownHeaderTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from app.include.embeddings.qwen_embedding import QwenEmbedding
 from app.include.config import config
