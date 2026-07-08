@@ -36,7 +36,7 @@ llm_analytics = ChatQwQ(
 main_llm=ChatQwQ(
     api_key=config.QWEN_API_KEY,
     model=config.MODEL_DIALOG_AI,
-    temperature=0.3,
+    temperature=0.18,
     top_p=0.95,
     extra_body={
         "enable_thinking": False,
