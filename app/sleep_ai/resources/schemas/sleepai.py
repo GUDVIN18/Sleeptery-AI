@@ -46,6 +46,7 @@ class UploadSleepAi(BaseModel):
     sleep_json: Dict[str, Any] = Field(
         description="Сон пользователя"
     )
+    hash_id: Optional[str] = Field(None, description="Хэш совета")
 
 class SleepGraphAi(UploadSleepAi):
     user_diary_records: Optional[Any] = Field(
