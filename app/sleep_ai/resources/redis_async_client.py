@@ -15,7 +15,7 @@ class AsyncRedisClient:
             user_id: int,
             sleep_date: str,
             app_version: AppVersion,
-            url: str = "redis://:hUvput-vujfow-ganma3@82.22.184.82:6379/0",
+            url: str = f"redis://:{config.REDIS_PASS}@127.0.0.1:6379/0",
             key_prefix: str = "generate_advice:"
         ):
         self.url = url

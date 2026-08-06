@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = Field("DEBUG")
     TEST_MODE_DB: bool = Field(False, env="TEST_MODE_DB")
 
+    REDIS_PASS: str = Field(..., env="REDIS_PASS")
+
     QWEN_API_KEY: str = Field(..., env="QWEN_API_KEY")
     GEMINI_API_KEY: str = Field(..., env="GEMINI_API_KEY")
     DEEPSEEK_API_KEY: str = Field(..., env="DEEPSEEK_API_KEY")
