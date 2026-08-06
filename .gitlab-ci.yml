@@ -9,7 +9,7 @@ build_image_prod:
   script:
     - rsync -zvrh ./* /sleeptery/Sleeptery-AI/
     - cd /sleeptery/Sleeptery-AI/
-    - docker-compose down
+    - docker compose down
     - docker compose up --build -d
     - docker ps
   rules:
