@@ -26,9 +26,9 @@ class Settings(BaseSettings):
     BATCH_SIZE: int = Field(..., env="BATCH_SIZE")
     RERANK_MODEL: str = Field(..., env="RERANK_MODEL")
 
-    LANGFUSE_SECRET_KEY: str = Field(..., env="LANGFUSE_SECRET_KEY")
-    LANGFUSE_PUBLIC_KEY: str = Field(..., env="LANGFUSE_PUBLIC_KEY")
-    LANGFUSE_BASE_URL: str = Field(..., env="LANGFUSE_BASE_URL")
+    LANGFUSE_SECRET_KEY: str = Field(None, env="LANGFUSE_SECRET_KEY")
+    LANGFUSE_PUBLIC_KEY: str = Field(None, env="LANGFUSE_PUBLIC_KEY")
+    LANGFUSE_BASE_URL: str = Field(None, env="LANGFUSE_BASE_URL")
 
     KAFKA_BROKER_URL_DEV: str = Field(..., env="KAFKA_BROKER_URL_DEV")
     KAFKA_BROKER_URL_PROD: str = Field(..., env="KAFKA_BROKER_URL_PROD")

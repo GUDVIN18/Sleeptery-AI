@@ -1,7 +1,7 @@
 from confluent_kafka import Consumer
 import asyncio
 import json
-
+from st_bases.telegram import TgLog
 from app.include.config import config
 from app.sleep_ai.resources.schemas.sleepai import UploadSleepAi
 from app.sleep_ai.resources.redis_async_client import AsyncRedisClient
@@ -52,6 +52,7 @@ async def run():
                     sleep_date=upload_data["sleep_date"],
                     app_version=upload_data["app_version"],
                     sleep_json=upload_data["sleep_json"],
+                    hash_id=upload_data["hash_id"]
                 )
 
                 async with AsyncRedisClient(
@@ -76,11 +77,11 @@ async def run():
                     f"user_id={data.user_id}: "
                     f"GENERATION ADVICE STARTED!"
                 )
-
-                await geration_pipe(data)
-
+                try:
+                    await geration_pipe(data)
+                except Exception as e:
+                    log.error(f"Ошибка при генерации совета: {e}")
                 consumer.commit(message=msg, asynchronous=False)
-
                 log.success(
                     f"{data.app_version} "
                     f"user_id={data.user_id}: "
@@ -90,12 +91,15 @@ async def run():
             except json.JSONDecodeError:
                 log.exception("Ошибка декодирования Kafka-сообщения")
 
-            except Exception:
+            except Exception as e:
                 log.exception("Ошибка при обработке сообщения сна")
+                await TgLog.error(f"Ошибка при обработке сообщения сна на ИИ сервере в consumer: \n {e}")
 
     except KeyboardInterrupt:
         log.info("Kafka consumer stopped")
 
+    except Exception as e:
+        await TgLog.error(f"Ошибка на ИИ сервере в consumer:\n {e}")
     finally:
         consumer.unsubscribe()
         consumer.close()

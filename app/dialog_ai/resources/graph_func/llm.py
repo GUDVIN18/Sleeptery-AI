@@ -19,7 +19,7 @@ os.environ["LANGFUSE_PUBLIC_KEY"] = config.LANGFUSE_PUBLIC_KEY
 os.environ["LANGFUSE_SECRET_KEY"] = config.LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_HOST"] = config.LANGFUSE_BASE_URL
 
-langfuse_handler = CallbackHandler()
+# langfuse_handler = CallbackHandler()
 
 
 llm_analytics = ChatQwQ(
@@ -31,7 +31,7 @@ llm_analytics = ChatQwQ(
     extra_body={
         "enable_thinking": False,
     },
-    callbacks=[langfuse_handler],
+    # callbacks=[langfuse_handler],
 )
 main_llm=ChatQwQ(
     api_key=config.QWEN_API_KEY,
@@ -42,5 +42,5 @@ main_llm=ChatQwQ(
         "enable_thinking": False,
         # "thinking_budget": 50,
     },
-    callbacks=[langfuse_handler],
+    # callbacks=[langfuse_handler],
 )

@@ -37,7 +37,7 @@ agent_helper=create_agent(
         extra_body={
             "enable_thinking": False,
         },
-        callbacks=[langfuse_handler],
+        # callbacks=[langfuse_handler],
     ),
     system_prompt=HELP_MODEL_INSTRUCTION,
     response_format=ResponseFormat
@@ -53,7 +53,7 @@ main_llm=ChatQwQ(
         "enable_thinking": True,
         "thinking_budget": 500,
     },
-    callbacks=[langfuse_handler],
+    # callbacks=[langfuse_handler],
 )
 
 classifier_llm = ChatQwQ(
@@ -65,5 +65,5 @@ classifier_llm = ChatQwQ(
         "enable_thinking": False,
         # "thinking_budget": 10,
     },
-    callbacks=[langfuse_handler],
+    # callbacks=[langfuse_handler],
 )

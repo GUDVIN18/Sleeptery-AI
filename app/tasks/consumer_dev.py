@@ -1,7 +1,7 @@
 from confluent_kafka import Consumer
 import asyncio
 import json
-
+from st_bases.telegram import TgLog
 from app.include.config import config
 from app.sleep_ai.resources.schemas.sleepai import UploadSleepAi
 from app.sleep_ai.resources.redis_async_client import AsyncRedisClient
@@ -65,9 +65,12 @@ async def run():
                             f"user_id={data.user_id}: ADVICE ALREADY GENERATING!"
                         )
 
-            except Exception:
+            except Exception as e:
                 log.exception("Ошибка при обработке сообщения")
+                await TgLog.error(f"Ошибка при обработке сообщения на ИИ сервере в consumer: \n {e}")
 
+    except Exception as e:
+        await TgLog.error(f"Ошибка на ИИ сервере в consumer: \n {e}")
     finally:
         consumer.unsubscribe()
         consumer.close()

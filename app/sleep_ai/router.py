@@ -18,7 +18,7 @@ router = APIRouter()
     name="Получить совет от SleepAI",
 )
 async def analyze_sleep(data: UploadSleepAi):
-    log.info(f"REQUEST: {data.user_id}")
+    log.info(f"REQUEST: {data}")
     try:
         async with AsyncRedisClient(
             user_id=data.user_id,
