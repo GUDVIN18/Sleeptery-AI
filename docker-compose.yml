@@ -42,7 +42,7 @@ services:
     env_file:
         - .env
     volumes:
-        - /sleeptery/Sleeptery-AI/logs:/app/logs
+        - ./logs:/app/logs
 
   consumer_prod:
     restart: always
@@ -52,4 +52,4 @@ services:
     env_file:
         - .env
     volumes:
-        - /sleeptery/Sleeptery-AI/logs:/app/logs
+        - ./logs:/app/logs
