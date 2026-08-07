@@ -1,5 +1,4 @@
 from pathlib import Path
-import pdfplumber
 import os
 from app.include.logging_config import logger as log
 from qdrant_client import QdrantClient, models

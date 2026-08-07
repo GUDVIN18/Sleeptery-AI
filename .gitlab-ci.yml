@@ -13,6 +13,6 @@ build_image_prod:
     - docker compose up --build -d
     - docker ps
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "prod" && $CI_PIPELINE_SOURCE == "push"'
 
 
