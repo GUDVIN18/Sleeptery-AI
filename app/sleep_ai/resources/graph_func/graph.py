@@ -29,7 +29,7 @@ async def init_models(state: SleepGraphAi) -> SleepGraphAi:
     state.user_diary_records=user_diary_records
     state.sleep_daily_stats=sleep_daily_stats
     state.sleep_weekly_stats=sleep_weekly_stats
-    state.history_sleep_assessment=history_sleep_assessment
+    state.history_sleep_assessment=None # Не будем пока передавать историю советов в LLM, чтобы не было повторов.
     print("Завершили сбор данных и перешли к llm_search")
     return state
 
