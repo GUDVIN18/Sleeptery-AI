@@ -1,7 +1,3 @@
-import os
-import torch
-import asyncio
-import time
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest_models

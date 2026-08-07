@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Dict, Any
 from dataclasses import dataclass
-import pymupdf4llm
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from pydantic import BaseModel, Field
 from langchain_qwq import ChatQwQ
