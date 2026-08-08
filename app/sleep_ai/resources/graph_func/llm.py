@@ -59,7 +59,7 @@ main_llm=ChatQwQ(
 classifier_llm = ChatQwQ(
     api_key=config.QWEN_API_KEY,
     # model=config.MODEL_SLEEP_AI,
-    model="qwen3.5-flash",
+    model="qwen3.7-flash",
     temperature=0.1,
     extra_body={
         "enable_thinking": False,
