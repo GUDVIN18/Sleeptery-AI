@@ -23,7 +23,7 @@ class AsyncRedisClient:
         # Создаем асинхронный пул соединений с Redis
         self.client = redis.from_url(url, decode_responses=True)
         self.key = f"{key_prefix}{app_version}_{user_id}_{sleep_date}"
-        self.ttl = 180 # 3 минут
+        self.ttl = 360 # 6 минут
 
     # вход в контекстный менеджер
     async def __aenter__(self):
