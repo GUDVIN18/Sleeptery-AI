@@ -19,7 +19,7 @@ build_image_prod:
     - if: '$CI_COMMIT_BRANCH == "prod" && $CI_PIPELINE_SOURCE == "push"'
 
   
-  build_image_dev:
+build_image_dev:
   stage: build
   tags:
     - sleep_ai
