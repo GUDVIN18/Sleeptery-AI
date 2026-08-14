@@ -34,21 +34,11 @@ services:
       HF_TOKEN: ${HF_TOKEN}
     restart: always
   
-  consumer_dev:
+  consumer:
     restart: always
     build: .
-    container_name: consumer_dev
-    command: bash -c "python -m app.tasks.consumer_dev"
-    env_file:
-        - .env
-    volumes:
-        - ./logs:/app/logs
-
-  consumer_prod:
-    restart: always
-    build: .
-    container_name: consumer_prod
-    command: bash -c "python -m app.tasks.consumer_prod"
+    container_name: ${CONSUMER_NAME}
+    command: bash -c "python -m app.tasks.consumer"
     env_file:
         - .env
     volumes:

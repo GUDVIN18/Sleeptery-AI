@@ -13,7 +13,7 @@ async def run():
     log.info("Starting Kafka consumer...")
 
     consumer = Consumer({
-        "bootstrap.servers": config.KAFKA_BROKER_URL_DEV,
+        "bootstrap.servers": config.KAFKA_BROKER_URL,
         "group.id": "sleep_ai_pending_generation",
         "auto.offset.reset": "earliest",
         "isolation.level": "read_committed",

@@ -32,8 +32,7 @@ class Settings(BaseSettings):
     LANGFUSE_PUBLIC_KEY: str = Field(None, env="LANGFUSE_PUBLIC_KEY")
     LANGFUSE_BASE_URL: str = Field(None, env="LANGFUSE_BASE_URL")
 
-    KAFKA_BROKER_URL_DEV: str = Field(..., env="KAFKA_BROKER_URL_DEV")
-    KAFKA_BROKER_URL_PROD: str = Field(..., env="KAFKA_BROKER_URL_PROD")
+    KAFKA_BROKER_URL: str = Field(..., env="KAFKA_BROKER_URL")
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -43,7 +43,7 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
         raise ValueError("Совет не будет сгенерирован. Сон не за сегодня")
         
     producer = Producer({
-        'bootstrap.servers': config.KAFKA_BROKER_URL_DEV if data.app_version == AppVersion.DEV else config.KAFKA_BROKER_URL_PROD,
+        'bootstrap.servers': config.KAFKA_BROKER_URL,
         'client.id': 'sleep_ai_ready_generation',
         'acks': 'all',
         'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
