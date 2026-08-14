@@ -15,20 +15,20 @@ embeddings_qwen = QwenEmbedding(
     dimensions=config.VECTOR_DIMENSION
 )
 
-qdrant_client = QdrantClient(host="localhost", port=config.QDRANT_PORT)
+qdrant_client = QdrantClient(host="localhost", port=6334)
 
 class SleepAiRagEmbeddingConfig:
     @staticmethod
     def run_pipeline(file_paths: list[Path]):
         # Пересоздаем коллекцию для чистоты теста
-        # if qdrant_client.collection_exists(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}"):
-        #     qdrant_client.delete_collection(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}")
+        if qdrant_client.collection_exists(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}"):
+            qdrant_client.delete_collection(collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}")
             
-        # log.info(f"Создание коллекции: {f'{config.COLLECTION_NAME_DIALOG_AI}'}")
-        # qdrant_client.recreate_collection(
-        #     collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}",
-        #     vectors_config=VectorParams(size=config.VECTOR_DIMENSION, distance=Distance.COSINE)
-        # )
+        log.info(f"Создание коллекции: {f'{config.COLLECTION_NAME_DIALOG_AI}'}")
+        qdrant_client.recreate_collection(
+            collection_name=f"{config.COLLECTION_NAME_DIALOG_AI}",
+            vectors_config=VectorParams(size=config.VECTOR_DIMENSION, distance=Distance.COSINE)
+        )
         try:
             log.info(f"{qdrant_client.get_collections()}")
         except Exception as e:
@@ -95,6 +95,7 @@ if __name__ == "__main__":
         file_paths=[
             # Path("app/dialog_ai/resources/RAG/knowledge_base/book_1-56.pdf"),
             # Path("app/dialog_ai/resources/RAG/knowledge_base/book_56-282pdf.pdf")
-            Path("app/dialog_ai/resources/RAG/knowledge_base/book_1-56.md")
+            Path("app/dialog_ai/resources/RAG/knowledge_base/book_1-56.md"),
+            Path("app/dialog_ai/resources/RAG/knowledge_base/book_parsed_56-282.md")
         ] 
     )
