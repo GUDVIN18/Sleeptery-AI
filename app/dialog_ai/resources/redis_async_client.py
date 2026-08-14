@@ -13,7 +13,7 @@ class AsyncRedisClient:
     def __init__(
             self,
             session_id: str,
-            url: str = "redis://:hUvput-vujfow-ganma3@82.22.184.82:6379/0",
+            url: str = f"redis://:{config.REDIS_PASS}@redis:6379/0",
             key_prefix: str = "dialog_ai_history:"
         ):
         self.session_id = session_id
