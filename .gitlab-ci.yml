@@ -7,8 +7,8 @@ build_image_prod:
   tags:
     - sleep_ai
   script:
-    - rsync -zvrh ./* /sleeptery/Sleeptery-AI/
-    - cd /sleeptery/Sleeptery-AI/
+    - rsync -zvrh ./* /sleeptery/Sleeptery-AI-PROD/
+    - cd /sleeptery/Sleeptery-AI-PROD/
     # - docker compose down
     - docker compose up --build -d
     - docker ps
@@ -17,3 +17,20 @@ build_image_prod:
     - docker logs consumer_dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "prod" && $CI_PIPELINE_SOURCE == "push"'
+
+  
+  build_image_dev:
+  stage: build
+  tags:
+    - sleep_ai
+  script:
+    - rsync -zvrh ./* /sleeptery/Sleeptery-AI-DEV/
+    - cd /sleeptery/Sleeptery-AI-DEV/
+    # - docker compose down
+    - docker compose up --build -d
+    - docker ps
+    - docker logs sleep_ai_app
+    - docker logs consumer_prod
+    - docker logs consumer_dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'

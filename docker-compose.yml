@@ -24,7 +24,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8881:8881"
+      - "8882:8882"
     depends_on:
       - qdrant
     environment:
