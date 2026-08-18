@@ -81,35 +81,71 @@ async def llm_advice_classifier(state: SleepGraphAi) -> SleepGraphAi:
     """
     prompt = PromptTemplate(
         template="""
-Ты классификатор типов советов для улучшения сна.
+# Role
 
-Определи тип совета:
+Ты классификатор советов Sleeptery.
+
+Твоя задача — определить, нужно ли сегодня анализировать существующую привычку пользователя
+или подобрать новую рекомендацию.
+
+# Types
 
 ANALYSIS_ADVICE
-если пользователь уже выполняет ритуал/привычку перед сном и его нужно проанализировать.
+
+Выбирай, если:
+- у пользователя есть конкретная привычка или ритуал;
+- он действительно выполнял её;
+- по данным последних дней можно оценить её связь со сном;
+- анализ этой привычки актуален для сегодняшнего сна.
 
 GENERATION_ADVICE
-если ритуала нет и нужно предложить новый или ритуал есть, но по анализу последних дней он не помогает.
 
-Привычка или ритуал пользователя:
-{default_habits} и {custom_habits}
+Выбирай, если:
+- подходящей привычки нет;
+- привычка есть, но недостаточно данных для её анализа;
+- привычка не связана с текущей проблемой сна;
+- существующая привычка не помогает и нужен другой подход.
 
-Сон за последние дни:
+# Main Rule
+
+Ориентируйся прежде всего на сегодняшний сон относительно последних дней.
+
+Наличие привычки само по себе НЕ является причиной выбирать ANALYSIS_ADVICE.
+
+Сначала определи, что изменилось в сегодняшнем сне, затем проверь,
+есть ли среди привычек пользователя релевантная этому изменению привычка.
+
+Если такой связи нет — выбирай GENERATION_ADVICE.
+
+# User Data
+
+## Привычки
+
+Стандартные:
+{default_habits}
+
+Пользовательские:
+{custom_habits}
+
+## Сон за последние дни
+
 {sleep_weekly_stats}
 
-Cон за сегодня:
+## Сон сегодня
+
 {sleep_daily_stats}
+
+# Output
 
 {format_instructions}
 
 Верни только JSON.
 """,
         input_variables=[
-            # "user_diary_records",
             "default_habits",
             "custom_habits",
             "sleep_daily_stats",
-            "sleep_weekly_stats"
+            "sleep_weekly_stats",
         ],
         partial_variables={
             "format_instructions": classifier_parser.get_format_instructions()
@@ -121,9 +157,10 @@ Cон за сегодня:
     habits = extract_habits(state.sleep_json["user_diary_records"])
     default_habits = habits["default_habits"]
     custom_habits = habits["custom_habits"]
+
     log.debug(f"{default_habits=}|{custom_habits=}")
+
     result = await chain.ainvoke({
-        # "user_diary_records": state.user_diary_records,
         "default_habits": default_habits,
         "custom_habits": custom_habits,
         "sleep_daily_stats": state.sleep_daily_stats,
@@ -131,7 +168,9 @@ Cон за сегодня:
     })
 
     state.advice_type = result["advice_type"]
+
     log.info(f"Определили тип будущего совета: {state.advice_type}")
+
     return state
 
 def route_advice(state: SleepGraphAi) -> str:

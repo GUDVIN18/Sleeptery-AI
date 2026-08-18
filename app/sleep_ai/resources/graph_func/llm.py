@@ -12,13 +12,24 @@ from langfuse.langchain import CallbackHandler
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-set_debug(False)
-try:
-    SYSTEM_INSTRUCTION = (BASE_DIR / "context" / "2025-11-12-instruction.txt").read_text(encoding="utf-8")
-    HELP_MODEL_INSTRUCTION = (BASE_DIR / "context" / "2026-08-07-help_model.txt").read_text(encoding="utf-8")
-except FileNotFoundError as e:
-    log.error(f"Failed to load prompt templates: {e}")
-    raise
+
+HELP_MODEL_INSTRUCTION = (
+    BASE_DIR / "context" / "help" / "system.md"
+).read_text(encoding="utf-8")
+
+MAIN_SYSTEM_INSTRUCTION = (
+    BASE_DIR / "context" / "main" / "system.md"
+).read_text(encoding="utf-8")
+
+MAIN_STYLE_INSTRUCTION = (
+    BASE_DIR / "context" / "main" / "style.md"
+).read_text(encoding="utf-8")
+
+SYSTEM_INSTRUCTION = (
+    MAIN_SYSTEM_INSTRUCTION
+    + "\n\n"
+    + MAIN_STYLE_INSTRUCTION
+)
 
 os.environ["LANGFUSE_PUBLIC_KEY"] = config.LANGFUSE_PUBLIC_KEY
 os.environ["LANGFUSE_SECRET_KEY"] = config.LANGFUSE_SECRET_KEY
