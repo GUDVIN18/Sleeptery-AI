@@ -68,7 +68,11 @@ async def run():
             except Exception as e:
                 log.exception("Ошибка при обработке сообщения")
                 await TgLog.error(f"Ошибка при обработке сообщения на ИИ сервере в consumer: \n {e}")
-
+            finally:
+                consumer.commit(
+                    message=msg,
+                    asynchronous=False,
+                )
     except Exception as e:
         await TgLog.error(f"Ошибка на ИИ сервере в consumer: \n {e}")
     finally:

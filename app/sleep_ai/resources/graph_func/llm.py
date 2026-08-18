@@ -11,32 +11,31 @@ from app.sleep_ai.resources.schemas.sleepai import (
 from langfuse.langchain import CallbackHandler
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+try:
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-HELP_MODEL_INSTRUCTION = (
-    BASE_DIR / "context" / "help" / "system.md"
-).read_text(encoding="utf-8")
+    HELP_MODEL_INSTRUCTION = (
+        BASE_DIR / "context" / "help" / "system.md"
+    ).read_text(encoding="utf-8")
 
-MAIN_SYSTEM_INSTRUCTION = (
-    BASE_DIR / "context" / "main" / "system.md"
-).read_text(encoding="utf-8")
+    MAIN_SYSTEM_INSTRUCTION = (
+        BASE_DIR / "context" / "main" / "system.md"
+    ).read_text(encoding="utf-8")
 
-MAIN_STYLE_INSTRUCTION = (
-    BASE_DIR / "context" / "main" / "style.md"
-).read_text(encoding="utf-8")
+    MAIN_STYLE_INSTRUCTION = (
+        BASE_DIR / "context" / "main" / "style.md"
+    ).read_text(encoding="utf-8")
 
-SYSTEM_INSTRUCTION = (
-    MAIN_SYSTEM_INSTRUCTION
-    + "\n\n"
-    + MAIN_STYLE_INSTRUCTION
-)
-
+    SYSTEM_INSTRUCTION = f"{MAIN_SYSTEM_INSTRUCTION}\n\n\n{MAIN_STYLE_INSTRUCTION}"
+except Exception as e: 
+    log.error(f"Error prompt {e}")
+    raise
 os.environ["LANGFUSE_PUBLIC_KEY"] = config.LANGFUSE_PUBLIC_KEY
 os.environ["LANGFUSE_SECRET_KEY"] = config.LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_HOST"] = config.LANGFUSE_BASE_URL
-
-
 langfuse_handler = CallbackHandler()
+
+log.info(f"{HELP_MODEL_INSTRUCTION}\n\n\n\n\n{SYSTEM_INSTRUCTION}")
 
 agent_helper=create_agent(
     model=ChatQwQ(

@@ -25,9 +25,18 @@ from .graph_func.graph import (
     llm_generation_response,
     route_advice
 )
-from confluent_kafka import Producer
 from st_bases.telegram import TgLog
+from confluent_kafka import Producer
 
+     
+producer = Producer({
+    'bootstrap.servers': config.KAFKA_BROKER_URL,
+    'client.id': 'sleep_ai_ready_generation',
+    'acks': 'all',
+    'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
+    'retries': 5, # количество попыток повторной отправки в случае неудачи
+    'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
+})
 
 async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
     if not config.QWEN_API_KEY:
@@ -41,15 +50,7 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
     if data.sleep_date < dt.date.today():
         log.info("Совет не будет сгенерирован. Сон не за сегодня")
         raise ValueError("Совет не будет сгенерирован. Сон не за сегодня")
-        
-    producer = Producer({
-        'bootstrap.servers': config.KAFKA_BROKER_URL,
-        'client.id': 'sleep_ai_ready_generation',
-        'acks': 'all',
-        'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
-        'retries': 5, # количество попыток повторной отправки в случае неудачи
-        'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
-    })
+
     start_time = time.time()
     graph = StateGraph(SleepGraphAi)
     # узлы
