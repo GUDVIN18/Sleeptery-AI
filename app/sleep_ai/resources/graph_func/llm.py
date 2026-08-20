@@ -35,13 +35,11 @@ os.environ["LANGFUSE_SECRET_KEY"] = config.LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_HOST"] = config.LANGFUSE_BASE_URL
 langfuse_handler = CallbackHandler()
 
-log.info(f"{HELP_MODEL_INSTRUCTION}\n\n\n\n\n{SYSTEM_INSTRUCTION}")
-
 agent_helper=create_agent(
     model=ChatQwQ(
         api_key=config.QWEN_API_KEY,
         # model=config.MODEL_SLEEP_AI,
-        model="qwen3.7-flash",
+        model="qwen3.5-flash",
         temperature=0.1,
         top_p=0.85,
         extra_body={
@@ -69,7 +67,7 @@ main_llm=ChatQwQ(
 classifier_llm = ChatQwQ(
     api_key=config.QWEN_API_KEY,
     # model=config.MODEL_SLEEP_AI,
-    model="qwen3.7-flash",
+    model="qwen3.5-flash",
     temperature=0.1,
     extra_body={
         "enable_thinking": False,
