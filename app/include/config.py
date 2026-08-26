@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     BATCH_SIZE: int = Field(..., env="BATCH_SIZE")
     RERANK_MODEL: str = Field(..., env="RERANK_MODEL")
 
+    ST_DAIRY_URL: str = Field(..., env="ST_DAIRY_URL")
+
     LANGFUSE_SECRET_KEY: str = Field(None, env="LANGFUSE_SECRET_KEY")
     LANGFUSE_PUBLIC_KEY: str = Field(None, env="LANGFUSE_PUBLIC_KEY")
     LANGFUSE_BASE_URL: str = Field(None, env="LANGFUSE_BASE_URL")

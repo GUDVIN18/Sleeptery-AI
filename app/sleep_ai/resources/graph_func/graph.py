@@ -9,6 +9,7 @@ from .parcers import extract_full_block, parser, classifier_parser
 from .llm import main_llm, agent_helper, classifier_llm, SYSTEM_INSTRUCTION
 from ..RAG.rag_langchain import retrieve_context
 from app.include.decorator import current_time
+from app.sleep_ai.resources.sleeptery_api import SleepteryDairyAPI
 
 
 @current_time
@@ -146,6 +147,7 @@ GENERATION_ADVICE
             "custom_habits",
             "sleep_daily_stats",
             "sleep_weekly_stats",
+            "user_goal",
         ],
         partial_variables={
             "format_instructions": classifier_parser.get_format_instructions()
@@ -157,14 +159,16 @@ GENERATION_ADVICE
     habits = extract_habits(state.sleep_json["user_diary_records"])
     default_habits = habits["default_habits"]
     custom_habits = habits["custom_habits"]
+    user_goal = await SleepteryDairyAPI.get_user_goal(user_id=state.user_id, date=state.sleep_date)
 
-    log.debug(f"{default_habits=}|{custom_habits=}")
+    log.debug(f"{user_goal=}|{default_habits=}|{custom_habits=}")
 
     result = await chain.ainvoke({
         "default_habits": default_habits,
         "custom_habits": custom_habits,
         "sleep_daily_stats": state.sleep_daily_stats,
         "sleep_weekly_stats": state.sleep_weekly_stats,
+        "user_goal": user_goal
     })
 
     state.advice_type = result["advice_type"]
@@ -187,8 +191,9 @@ async def llm_analysis_response(state: SleepGraphAi) -> SleepGraphAi:
     prompt_template = PromptTemplate(
         template="""
 {system_instructions}
-
-Пользователь уже использует ритуал перед сном.
+\n\n\n
+Важно!!!
+Пользователь УЖЕ использует ритуал перед сном.
 
 Дневник пользователя:
 {user_diary_records}
