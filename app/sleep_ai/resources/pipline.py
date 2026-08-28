@@ -34,22 +34,17 @@ producer = Producer({
     'client.id': 'sleep_ai_ready_generation',
     'acks': 'all',
     'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
-    'retries': 5, # количество попыток повторной отправки в случае неудачи
+    # 'retries': 5, # количество попыток повторной отправки в случае неудачи
     'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
 })
 
-async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi:
+async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi | None:
     if not config.QWEN_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
-    # utc_offset = int(data.sleep_json["utc_offset"])
-    # user_date_today = (
-    #     dt.datetime.now(dt.timezone.utc)
-    #     .astimezone(dt.timezone(dt.timedelta(minutes=utc_offset)))
-    #     .date()
-    # )
+
     if data.sleep_date < dt.date.today():
         log.info("Совет не будет сгенерирован. Сон не за сегодня")
-        raise ValueError("Совет не будет сгенерирован. Сон не за сегодня")
+        return None
 
     start_time = time.time()
     graph = StateGraph(SleepGraphAi)
