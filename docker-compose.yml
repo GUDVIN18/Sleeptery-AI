@@ -9,6 +9,8 @@ services:
     volumes:
       - ./appqdrant_storage:/qdrant/storage
     restart: always
+    networks:
+      - default
 
   redis:
     image: redis:7-alpine
@@ -17,6 +19,8 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
     restart: always
+    networks:
+      - default
 
   app:
     build: .
@@ -29,17 +33,26 @@ services:
       - qdrant
     environment:
       QDRANT_HOST: qdrant
-      QDRANT_PORT: 6333
+      QDRANT_PORT: ${QDRANT_PORT}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       HF_TOKEN: ${HF_TOKEN}
     restart: always
-  
+    networks:
+      - default
+
   consumer:
     restart: always
     build: .
     container_name: ${CONSUMER_NAME}
     command: bash -c "python -m app.tasks.consumer"
     env_file:
-        - .env
+      - .env
     volumes:
-        - ./logs:/app/logs
+      - ./logs:/app/logs
+    networks:
+      - default
+
+networks:
+  default:
+    external: true
+    name: sleeptery
