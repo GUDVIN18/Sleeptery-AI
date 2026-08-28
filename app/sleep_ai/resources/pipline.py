@@ -34,7 +34,6 @@ producer = Producer({
     'client.id': 'sleep_ai_ready_generation',
     'acks': 'all',
     'enable.idempotence': True, # гарантирует, что сообщения не будут потеряны и не будут продублированы в случае сбоев,
-    # 'retries': 5, # количество попыток повторной отправки в случае неудачи
     'compression.type': 'zstd', # сжатие сообщений для оптимизации производительности
 })
 
