@@ -159,7 +159,8 @@ GENERATION_ADVICE
     habits = extract_habits(state.sleep_json["user_diary_records"])
     default_habits = habits["default_habits"]
     custom_habits = habits["custom_habits"]
-    user_goal = await SleepteryDairyAPI.get_user_goal(user_id=state.user_id, date=state.sleep_date)
+    # user_goal = await SleepteryDairyAPI.get_user_goal(user_id=state.user_id, date=state.sleep_date)
+    user_goal = None
 
     log.debug(f"{user_goal=}|{default_habits=}|{custom_habits=}")
 
