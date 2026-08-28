@@ -9,17 +9,17 @@ from app.sleep_ai.resources.pipline import geration_pipe
 from app.include.logging_config import logger as log
 
 
+consumer = Consumer({
+    "bootstrap.servers": config.KAFKA_BROKER_URL,
+    "group.id": "sleep_ai_pending_generation",
+    "auto.offset.reset": "earliest",
+    "isolation.level": "read_committed",
+    "enable.auto.commit": False,
+    "max.poll.interval.ms": 600_000,
+})
+
 async def run():
     log.info("Starting Kafka consumer...")
-
-    consumer = Consumer({
-        "bootstrap.servers": config.KAFKA_BROKER_URL,
-        "group.id": "sleep_ai_pending_generation",
-        "auto.offset.reset": "earliest",
-        "isolation.level": "read_committed",
-        "enable.auto.commit": False,
-        "max.poll.interval.ms": 600_000,
-    })
 
     consumer.subscribe(["sleep_ai_pending_generation"])
 
