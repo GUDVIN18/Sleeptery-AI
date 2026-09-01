@@ -2,12 +2,8 @@ import os
 from pathlib import Path
 from app.include.config import config
 from langchain_qwq import ChatQwQ
-from langchain.agents import create_agent
 from langchain_core.globals import set_debug
 from app.include.logging_config import logger as log
-from app.sleep_ai.resources.schemas.sleepai import (
-    ResponseFormat,
-)
 from langfuse.langchain import CallbackHandler
 
 
@@ -35,20 +31,16 @@ os.environ["LANGFUSE_SECRET_KEY"] = config.LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_HOST"] = config.LANGFUSE_BASE_URL
 langfuse_handler = CallbackHandler()
 
-agent_helper=create_agent(
-    model=ChatQwQ(
-        api_key=config.QWEN_API_KEY,
-        # model=config.MODEL_SLEEP_AI,
-        model="qwen3.7-flash",
-        temperature=0.1,
-        top_p=0.85,
-        extra_body={
-            "enable_thinking": False,
-        },
-        # callbacks=[langfuse_handler],
-    ),
-    system_prompt=HELP_MODEL_INSTRUCTION,
-    response_format=ResponseFormat
+helper_llm = ChatQwQ(
+    api_key=config.QWEN_API_KEY,
+    # model=config.MODEL_SLEEP_AI,
+    model="qwen3.7-flash",
+    temperature=0.10,
+    top_p=0.80,
+    extra_body={
+        "enable_thinking": False,
+    },
+    # callbacks=[langfuse_handler],
 )
 
 

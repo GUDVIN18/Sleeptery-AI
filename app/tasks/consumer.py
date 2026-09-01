@@ -55,7 +55,6 @@ async def run():
                     if await client.create_cache_advice():
                         result = await geration_pipe(data)
 
-                        consumer.commit(message=msg, asynchronous=False,)
                         if result is not None:
                             log.success(
                                 f"{data.app_version} user_id={data.user_id}: GENERATION ADVICE FINISHED!"

@@ -1,12 +1,14 @@
 from app.include.logging_config import logger as log
+import asyncio
 from app.sleep_ai.resources.schemas.sleepai import (
     SleepGraphAi,
     AdviceType,
 )
 from typing import Optional
 from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
 from .parcers import extract_full_block, parser, classifier_parser
-from .llm import main_llm, agent_helper, classifier_llm, SYSTEM_INSTRUCTION
+from .llm import main_llm, helper_llm, classifier_llm, SYSTEM_INSTRUCTION, HELP_MODEL_INSTRUCTION
 from ..RAG.rag_langchain import retrieve_context
 from app.include.decorator import current_time
 from app.sleep_ai.resources.sleeptery_api import SleepteryDairyAPI
@@ -37,19 +39,64 @@ async def init_models(state: SleepGraphAi) -> SleepGraphAi:
 @current_time
 async def llm_search(state: SleepGraphAi) -> SleepGraphAi:
     """Узел для анализа проблемы и поика в векторной БД"""
-    helper_analytics = await agent_helper.ainvoke(
-        {"messages":
-            [
-                {"role": "user", "content": f"Дневник пользователя на сегодняшний день: {state.user_diary_records}"},
-                {"role": "user", "content": f"Сформированный сон за сегодня: {state.sleep_daily_stats}"},
-                {"role": "user", "content": f"Сформированный сон за последние 3 дня: {state.sleep_weekly_stats}"},
-                {"role": "user", "content": f"История советов по улучшению сна: {state.history_sleep_assessment}"},
-            ]
-        }
+    prompt = PromptTemplate(
+        template="""
+{system_instructions}
+
+Дневник пользователя на сегодняшний день:
+{user_diary_records}
+
+Сформированный сон за сегодня:
+{sleep_daily_stats}
+
+Сформированный сон за последние 3 дня:
+{sleep_weekly_stats}
+
+История советов по улучшению сна:
+{history_sleep_assessment}
+
+Верни только JSON-массив строк. Без markdown, комментариев и дополнительных полей.
+""",
+        input_variables=[
+            "user_diary_records",
+            "sleep_daily_stats",
+            "sleep_weekly_stats",
+            "history_sleep_assessment",
+        ],
+        partial_variables={"system_instructions": HELP_MODEL_INSTRUCTION},
     )
-    problems = helper_analytics['structured_response'].recommendations
+    chain = prompt | helper_llm | JsonOutputParser()
+
+    try:
+        problems = await asyncio.wait_for(
+            chain.ainvoke({
+                "user_diary_records": state.user_diary_records,
+                "sleep_daily_stats": state.sleep_daily_stats,
+                "sleep_weekly_stats": state.sleep_weekly_stats,
+                "history_sleep_assessment": state.history_sleep_assessment,
+            }),
+            timeout=90,
+        )
+    except Exception:
+        log.exception("Ошибка helper LLM в llm_search. Продолжаем без тем для RAG.")
+        problems = []
+
+    if isinstance(problems, dict):
+        problems = problems.get("recommendations", [])
+    if not isinstance(problems, list):
+        log.warning(f"Некорректный формат helper LLM: {problems!r}")
+        problems = []
+    problems = [problem for problem in problems if isinstance(problem, str)]
+
     log.info(f"Extracted problems: {problems} ")
-    rag_answer = await retrieve_context(topics=problems, is_test=True) # is_test=config.TEST_MODE_DB
+    try:
+        rag_answer = await asyncio.wait_for(
+            retrieve_context(topics=problems, is_test=True), # is_test=config.TEST_MODE_DB
+            timeout=90,
+        )
+    except Exception:
+        log.exception("Ошибка RAG в llm_search. Продолжаем без контекста из векторной БД.")
+        rag_answer = []
     state.context_vector_db=rag_answer
     return state
 
