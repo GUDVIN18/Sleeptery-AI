@@ -41,9 +41,9 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi | None:
     if not config.QWEN_API_KEY:
         raise SleepAiErrorConnect("API key is not set.")
 
-    if data.sleep_date < dt.date.today():
-        log.info("Совет не будет сгенерирован. Сон не за сегодня")
-        return None
+    # if data.sleep_date < dt.date.today():
+    #     log.info("Совет не будет сгенерирован. Сон не за сегодня")
+    #     return None
 
     start_time = time.time()
     graph = StateGraph(SleepGraphAi)
