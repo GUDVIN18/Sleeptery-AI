@@ -1,1 +1,1 @@
-git+https://RNiafwYi-A-4USAVHxzx:RNiafwYi-A-4USAVHxzx@sea.xdev.team/sleeptery/st_bases@0.8.4.0
+git+https://RNiafwYi-A-4USAVHxzx:RNiafwYi-A-4USAVHxzx@sea.xdev.team/sleeptery/st_bases@0.8.4.3
