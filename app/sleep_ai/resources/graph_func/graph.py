@@ -315,16 +315,24 @@ async def llm_generation_response(state: SleepGraphAi) -> SleepGraphAi:
     )
 
     chain = prompt_template | main_llm | parser
-    result = await chain.ainvoke({
-        "sleep_daily_stats": state.sleep_daily_stats,
-        "history_sleep_assessment": state.history_sleep_assessment,
-        "context": state.context_vector_db,
-        "sleep_weekly_stats": state.sleep_weekly_stats
-    })
+    try:
+        result = await asyncio.wait_for(
+            chain.ainvoke({
+                "sleep_daily_stats": state.sleep_daily_stats,
+                "history_sleep_assessment": state.history_sleep_assessment,
+                "context": state.context_vector_db,
+                "sleep_weekly_stats": state.sleep_weekly_stats
+            }),
+            timeout=90,
+        )
 
-    state.sleep_assessment = result["sleep_assessment"]
-    state.response = result["response"]
-    state.diary_recommendation = result.get("diary_recommendation")
-    state.mission = result.get("mission")
-    log.debug(f"Завершили создание нового совета")
-    return state
+        state.sleep_assessment = result["sleep_assessment"]
+        state.response = result["response"]
+        state.diary_recommendation = result.get("diary_recommendation")
+        state.mission = result.get("mission")
+        log.debug(f"Завершили создание нового совета")
+
+        return state
+    except Exception as e:
+        log.exception(f"Ошибка main LLM в llm_generation_response: {e}")
+        raise
