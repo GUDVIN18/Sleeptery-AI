@@ -232,6 +232,8 @@ async def llm_ritual_response(state: SleepGraphAi) -> SleepGraphAi:
 # Сон за сегодня:
 {sleep_daily_stats}
 
+# История советов (новый не повторять со старыми):
+{history_sleep_assessment}
 
 # Формат ответа
 {format_instructions}
@@ -242,6 +244,9 @@ async def llm_ritual_response(state: SleepGraphAi) -> SleepGraphAi:
         input_variables=[
             "user_diary_records",
             "sleep_daily_stats",
+            "context",
+            "user_rituals",
+            "history_sleep_assessment"
         ],
         partial_variables={
             "format_instructions": parser.get_format_instructions(),
@@ -257,7 +262,9 @@ async def llm_ritual_response(state: SleepGraphAi) -> SleepGraphAi:
             chain.ainvoke({
                 "user_diary_records": state.user_diary_records,
                 "sleep_daily_stats": state.sleep_daily_stats,
-                "user_rituals": state.user_rituals
+                "user_rituals": state.user_rituals,
+                "context": state.context_vector_db,
+                "history_sleep_assessment": state.history_sleep_assessment,
             }),
             timeout=90,
         )
@@ -363,7 +370,6 @@ async def llm_goal_response(state: SleepGraphAi) -> SleepGraphAi:
             "sleep_daily_stats",
             "history_sleep_assessment",
             "context",
-            "sleep_weekly_stats",
             "user_goal"
         ],
         partial_variables={
@@ -380,7 +386,6 @@ async def llm_goal_response(state: SleepGraphAi) -> SleepGraphAi:
                 "sleep_daily_stats": state.sleep_daily_stats,
                 "history_sleep_assessment": state.history_sleep_assessment,
                 "context": state.context_vector_db,
-                "sleep_weekly_stats": state.sleep_weekly_stats,
                 "user_goal": state.user_goal
             }),
             timeout=90,
