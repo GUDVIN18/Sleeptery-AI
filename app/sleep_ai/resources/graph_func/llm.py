@@ -10,8 +10,20 @@ from langfuse.langchain import CallbackHandler
 try:
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-    HELP_MODEL_INSTRUCTION = (
-        BASE_DIR / "context" / "help" / "system.md"
+    SEARCH_MODEL_INSTRUCTION = (
+        BASE_DIR / "context" / "help" / "search_model.md"
+    ).read_text(encoding="utf-8")
+
+    GOAL_INSTRUCTION = (
+        BASE_DIR / "context" / "help" / "goal_system.md"
+    ).read_text(encoding="utf-8")
+
+    ADVICE_CLASSIFIER_INSTRUCTION = (
+        BASE_DIR / "context" / "help" / "advice_classifier.md"
+    ).read_text(encoding="utf-8")
+
+    RITUAL_INSTRUCTION = (
+        BASE_DIR / "context" / "help" / "ritual_system.md"
     ).read_text(encoding="utf-8")
 
     MAIN_SYSTEM_INSTRUCTION = (

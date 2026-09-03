@@ -21,9 +21,10 @@ from .graph_func.graph import (
     init_models,
     llm_search,
     llm_advice_classifier,
-    llm_analysis_response,
+    llm_ritual_response,
     llm_generation_response,
-    route_advice
+    route_advice,
+    llm_goal_response
 )
 from st_bases.telegram import TgLog
 from confluent_kafka import Producer
@@ -52,8 +53,9 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi | None:
     graph.add_node("llm_search", llm_search)
     # graph.add_node("llm_analysis", llm_analysis)
     graph.add_node("llm_advice_classifier", llm_advice_classifier)
-    graph.add_node("analysis_response", llm_analysis_response)
+    graph.add_node("ritual_response", llm_ritual_response)
     graph.add_node("generation_response", llm_generation_response)
+    graph.add_node("goal_response", llm_goal_response)
 
     # ребра
     graph.add_edge(START, "init_models")
@@ -63,11 +65,13 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi | None:
         "llm_advice_classifier",
         route_advice,
         {
-            AdviceType.ANALYSIS_ADVICE.value: "analysis_response",
-            AdviceType.GENERATION_ADVICE.value: "generation_response"
+            AdviceType.RITUAL_ADVICE.value: "ritual_response",
+            AdviceType.GENERATION_ADVICE.value: "generation_response",
+            AdviceType.GOAL_ADVICE.value: "goal_response"
         }
     )
-    graph.add_edge("analysis_response", END)
+    graph.add_edge("goal_response", END)
+    graph.add_edge("ritual_response", END)
     graph.add_edge("generation_response", END)
     app = graph.compile()
 

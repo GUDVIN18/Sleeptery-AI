@@ -7,7 +7,7 @@ from app.include.logging_config import logger as log
 class SleepteryDairyAPI:
     _client=httpx.AsyncClient(
         base_url=config.ST_DAIRY_URL,
-        timeout=15
+        timeout=10
     )
 
     @classmethod

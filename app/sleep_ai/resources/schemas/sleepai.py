@@ -34,7 +34,8 @@ class ResponseSleepAi(BaseModel):
 
 class AdviceType(str, Enum):
     GENERATION_ADVICE='generation_advice'
-    ANALYSIS_ADVICE='analysis_advice'
+    RITUAL_ADVICE='ritual_advice'
+    GOAL_ADVICE="goal_advice"
     
 class AdviceClassifier(BaseModel):
     advice_type: AdviceType
@@ -68,7 +69,14 @@ class SleepGraphAi(UploadSleepAi):
         default=None,
         description="История советов по улучшению сна (как раз они не должны повторяться)"
     )
-
+    user_goal: Optional[Any] = Field(
+        default=None,
+        description="Цель пользователя на сегодня"
+    )
+    user_rituals: Optional[List[Any]] = Field(
+        default=None,
+        description="Ритуалы пользователя на сегодня"
+    )
     context_vector_db: Optional[Any] = Field(
         None,
         description="Контекст из векторноый базы знаний"
