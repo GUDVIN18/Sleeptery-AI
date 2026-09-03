@@ -9,3 +9,4 @@
 *.рус
 appqdrant_storage/
 __pycache__/
+*.pyc
