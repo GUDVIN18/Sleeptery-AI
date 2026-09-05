@@ -8,5 +8,6 @@
 *.log.zip
 *.рус
 appqdrant_storage/
-__pycache__/
+*__pycache__/
 *.pyc
+*test.json
