@@ -73,7 +73,7 @@ class SleepGraphAi(UploadSleepAi):
         default=None,
         description="Цель пользователя на сегодня"
     )
-    user_rituals: Optional[List[Any]] = Field(
+    user_rituals: Optional[Any] = Field(
         default=None,
         description="Ритуалы пользователя на сегодня"
     )

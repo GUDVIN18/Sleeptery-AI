@@ -38,8 +38,8 @@ async def init_models(state: SleepGraphAi) -> SleepGraphAi:
         for day in state.sleep_json["history_sleep_assessment"]
     ]
     rituals = (
-        (user_diary_records.get("default_habits") or [])
-        + (user_diary_records.get("custom_habits") or [])
+        f"{user_diary_records.get("default_habits")}",
+        f"{user_diary_records.get("custom_habits")}"
     )
 
     state.user_rituals=rituals
