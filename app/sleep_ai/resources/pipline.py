@@ -95,14 +95,14 @@ async def geration_pipe(data: UploadSleepAi) -> SleepGraphAi | None:
         raise
 
 
-# if __name__ == "__main__":
-#     user_prompt_path = "/sleeptery/Sleeptery-AI/app/sleep_ai/resources/sleep_debug.json"
-#     with open(user_prompt_path, "r") as f:
-#         sleep_json = f.read()
-#         data_test = UploadSleepAi(
-#             app_version="dev",
-#             user_id=123,
-#             sleep_date="2024-10-01",
-#             sleep_json=json.loads(sleep_json)
-#         )
-#     asyncio.run(geration_pipe(data=data_test))
+if __name__ == "__main__":
+    user_prompt_path = "app/sleep_ai/context/test.json"
+    with open(user_prompt_path, "r") as f:
+        sleep_json = f.read()
+        data_test = UploadSleepAi(
+            app_version="dev",
+            user_id=123,
+            sleep_date="2024-10-01",
+            sleep_json=json.loads(sleep_json)
+        )
+    asyncio.run(geration_pipe(data=data_test))

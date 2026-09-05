@@ -19,7 +19,7 @@ class SleepteryDairyAPI:
         response = await cls._client.get(
             f"/user-goal/inner/user/{user_id}",
             headers={
-                "Authorization": config.DOCKER_SECRET
+                "Secret": config.DOCKER_SECRET
             },
             params={
                 "date": date
